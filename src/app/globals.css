@@ -1,26 +1,210 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@theme {
+  --color-purple-royal: #4c1d95;
+  --color-purple-light: #7c3aed;
+  --color-purple-dark: #2e1065;
+  --color-gold-luxury: #d4af37;
+  --color-gold-light: #fbbf24;
+  --color-gold-dark: #b45309;
+  --color-ivory-soft: #f9f6f0;
+  --color-charcoal-dark: #1f2937;
+  
+  --font-sans: var(--font-poppins), system-ui, -apple-system, sans-serif;
+  
+  --animate-float-slow: float-slow 20s ease-in-out infinite;
+  --animate-float-reverse: float-reverse 25s ease-in-out infinite;
+  --animate-pulse-slow: pulse-slow 8s ease-in-out infinite;
+  --animate-spin-slow: spin-slow 40s linear infinite;
+  
+  @keyframes float-slow {
+    0%, 100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.95);
+    }
+  }
+  @keyframes float-reverse {
+    0%, 100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(-40px, 40px) scale(0.9);
+    }
+    66% {
+      transform: translate(30px, -20px) scale(1.05);
+    }
+  }
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 }
 
+:root {
+  --background: #f9f6f0;
+  --foreground: #1f2937;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f9f6f0;
+  color: #1f2937;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.01);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(76, 29, 149, 0.08), 0 0 15px rgba(212, 175, 55, 0.12);
+  border-color: rgba(212, 175, 55, 0.35);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.glass-card-purple {
+  background: linear-gradient(135deg, rgba(76, 29, 149, 0.08), rgba(46, 16, 101, 0.03));
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(76, 29, 149, 0.15);
+  box-shadow: 0 10px 40px rgba(76, 29, 149, 0.03);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-purple:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(76, 29, 149, 0.12), 0 0 20px rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+  background: linear-gradient(135deg, rgba(76, 29, 149, 0.12), rgba(46, 16, 101, 0.06));
+}
+
+.glass-card-gold {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(180, 83, 9, 0.03));
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 0 10px 40px rgba(212, 175, 55, 0.04);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-gold:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(212, 175, 55, 0.15), 0 0 20px rgba(76, 29, 149, 0.1);
+  border-color: rgba(76, 29, 149, 0.3);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(180, 83, 9, 0.06));
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(76, 29, 149, 0.15);
+  backdrop-filter: blur(10px);
+  color: #1f2937;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: #d4af37;
+  outline: none;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+.glass-button {
+  background: linear-gradient(135deg, #4c1d95, #2e1065);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #f9f6f0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(76, 29, 149, 0.25);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.glass-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(76, 29, 149, 0.35), 0 0 15px rgba(212, 175, 55, 0.45);
+  border-color: rgba(212, 175, 55, 0.65);
+}
+
+.glass-button-gold {
+  background: linear-gradient(135deg, #d4af37, #b45309);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #1f2937;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+  cursor: pointer;
+}
+
+.glass-button-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5), 0 0 15px rgba(76, 29, 149, 0.25);
+  border-color: #4c1d95;
+}
+
+.glass-button-secondary {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(76, 29, 149, 0.15);
+  color: #4c1d95;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.glass-button-secondary:hover {
+  background: rgba(255, 255, 255, 0.7);
+  transform: translateY(-2px);
+  border-color: #d4af37;
+  box-shadow: 0 5px 15px rgba(76, 29, 149, 0.08);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(76, 29, 149, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(76, 29, 149, 0.4);
+}
+
+/* Gold Text Gradient */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #d4af37 0%, #f59e0b 50%, #b45309 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-purple-gradient {
+  background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #2e1065 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
