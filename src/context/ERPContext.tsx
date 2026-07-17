@@ -519,6 +519,151 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // --- MOCK DATABASE LOAD ---
   useEffect(() => {
+    if (isSupabaseConfigured) {
+      const loadCloudData = async () => {
+        try {
+          const { data: bData } = await supabase.from("bookings").select("*");
+          if (bData && bData.length > 0) {
+            setBookings(bData.map(b => ({
+              id: b.id,
+              customerName: b.customer_name,
+              customerPhoto: b.customer_photo,
+              email: b.email,
+              phoneNumber: b.phone_number,
+              venueName: b.venue_name,
+              bookingType: "Wedding",
+              bookingDate: b.booking_date,
+              guestCount: b.guest_count,
+              amount: b.amount,
+              status: b.status,
+              progress: b.progress,
+              packageSelected: b.package_selected,
+            })));
+          }
+
+          const { data: rData } = await supabase.from("booking_requests").select("*");
+          if (rData && rData.length > 0) {
+            setBookingRequests(rData.map(r => ({
+              id: r.id,
+              customerName: r.customer_name,
+              phoneNumber: r.phone_number,
+              email: r.email,
+              venue: r.venue,
+              eventType: r.event_type,
+              eventDate: r.event_date,
+              eventSession: r.event_session,
+              guests: r.guests,
+              packageSelected: r.package_selected,
+              vendors: r.vendors,
+              additionalServices: r.additional_services,
+              pricingBreakdown: r.pricing_breakdown,
+              status: r.status,
+              createdAt: r.created_at,
+            })));
+          }
+
+          const { data: vData } = await supabase.from("vendors").select("*");
+          if (vData && vData.length > 0) {
+            setVendors(vData.map(v => ({
+              id: v.id,
+              name: v.name,
+              category: v.category,
+              logo: v.logo || "",
+              coverImage: v.cover_image || "",
+              price: v.price,
+              location: v.location,
+              phone: v.phone,
+              email: v.email,
+              instagram: v.instagram || "",
+              whatsapp: v.whatsapp || "",
+              commissionPercentage: v.commission_percentage,
+              rating: Number(v.rating),
+              completedWeddings: v.completed_weddings,
+              featured: v.featured,
+              gallery: v.gallery || [],
+              menuItems: v.menu_items || [],
+              photographyPortfolio: v.photography_portfolio || [],
+              availability: v.availability || []
+            })));
+          }
+
+          const { data: iData } = await supabase.from("invoices").select("*");
+          if (iData && iData.length > 0) {
+            setInvoices(iData.map(i => ({
+              id: i.id,
+              invoiceNo: i.invoice_no || `BL-2026-${i.id}`,
+              clientName: i.client_name,
+              date: i.date,
+              bookingId: i.booking_id,
+              bookingType: "Wedding",
+              taxableAmount: Math.round(i.amount / 1.18),
+              cgst: Math.round((i.amount / 1.18) * 0.09),
+              sgst: Math.round((i.amount / 1.18) * 0.09),
+              totalAmount: i.amount,
+              status: i.status,
+            })));
+          }
+
+          const { data: eData } = await supabase.from("expenses").select("*");
+          if (eData && eData.length > 0) {
+            setExpenses(eData.map(e => ({
+              id: e.id,
+              category: e.category,
+              amount: e.amount,
+              date: e.date,
+              description: e.description || "",
+              payee: e.payee || "Vendor",
+            })));
+          }
+
+          const { data: glData } = await supabase.from("generator_logs").select("*");
+          if (glData && glData.length > 0) {
+            setGeneratorLogs(glData.map(g => ({
+              id: g.id,
+              date: g.date,
+              dieselAddedLitres: g.fuel_added,
+              costPerLitre: 98.5,
+              totalCost: g.fuel_added * 98.5,
+              runHoursAdded: g.runtime_hours,
+              fuelLevelAfter: 90,
+              loggedBy: g.operator_name || "Staff",
+            })));
+          }
+
+          const { data: tData } = await supabase.from("kanban_tasks").select("*");
+          if (tData && tData.length > 0) {
+            setKanbanTasks(tData.map(t => ({
+              id: t.id,
+              title: t.title,
+              assignee: t.assignee,
+              status: t.status,
+              priority: t.priority,
+              category: "General",
+              description: "",
+              date: t.due_date,
+            })));
+          }
+
+          const { data: auditData } = await supabase.from("audit_logs").select("*");
+          if (auditData && auditData.length > 0) {
+            setAuditLogs(auditData.map(a => ({
+              id: a.id,
+              timestamp: a.timestamp,
+              user: a.user,
+              action: a.action,
+              ipAddress: a.ip_address,
+              status: a.status,
+            })));
+          }
+        } catch (err) {
+          console.error("Bhagyalaxmi ERP: Error loading Supabase tables:", err);
+        }
+      };
+
+      loadCloudData();
+      return;
+    }
+
     const cachedBookings = localStorage.getItem("bl_bookings");
     const cachedCustomers = localStorage.getItem("bl_customers");
     const cachedInvoices = localStorage.getItem("bl_invoices");
@@ -851,6 +996,135 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem("bl_booking_requests", JSON.stringify(updatedRequests || bookingRequests));
     localStorage.setItem("bl_vendors", JSON.stringify(updatedVendors || vendors));
     localStorage.setItem("bl_config", JSON.stringify(updatedConfig || configSettings));
+
+    // Cloud integration sync
+    if (isSupabaseConfigured) {
+      const syncCloud = async () => {
+        try {
+          if (updatedBookings.length > 0) {
+            await supabase.from("bookings").upsert(updatedBookings.map(b => ({
+              id: b.id,
+              customer_name: b.customerName,
+              customer_photo: b.customerPhoto,
+              email: b.email,
+              phone_number: b.phoneNumber,
+              venue_name: b.venueName,
+              booking_date: b.bookingDate,
+              guest_count: b.guestCount,
+              amount: b.amount,
+              advance_paid: 0,
+              status: b.status,
+              progress: b.progress,
+              package_selected: b.packageSelected
+            })));
+          }
+
+          const reqs = updatedRequests || bookingRequests;
+          if (reqs.length > 0) {
+            await supabase.from("booking_requests").upsert(reqs.map(r => ({
+              id: r.id,
+              customer_name: r.customerName,
+              phone_number: r.phoneNumber,
+              email: r.email,
+              venue: r.venue,
+              event_type: r.eventType,
+              event_date: r.eventDate,
+              event_session: r.eventSession,
+              guests: r.guests,
+              package_selected: r.packageSelected,
+              vendors: r.vendors,
+              additional_services: r.additionalServices,
+              pricing_breakdown: r.pricingBreakdown,
+              status: r.status
+            })));
+          }
+
+          const vdrs = updatedVendors || vendors;
+          if (vdrs.length > 0) {
+            await supabase.from("vendors").upsert(vdrs.map(v => ({
+              id: v.id,
+              name: v.name,
+              category: v.category,
+              logo: v.logo,
+              cover_image: v.coverImage,
+              price: v.price,
+              location: v.location,
+              phone: v.phone,
+              email: v.email,
+              instagram: v.instagram,
+              whatsapp: v.whatsapp,
+              commission_percentage: v.commissionPercentage,
+              rating: v.rating,
+              completed_weddings: v.completedWeddings,
+              featured: v.featured,
+              gallery: v.gallery,
+              menu_items: v.menuItems,
+              photography_portfolio: v.photographyPortfolio
+            })));
+          }
+
+          if (updatedInvoices.length > 0) {
+            await supabase.from("invoices").upsert(updatedInvoices.map(i => ({
+              id: i.id,
+              booking_id: i.bookingId,
+              client_name: i.clientName,
+              date: i.date,
+              amount: i.totalAmount,
+              status: i.status,
+              gst_number: ""
+            })));
+          }
+
+          if (updatedExpenses.length > 0) {
+            await supabase.from("expenses").upsert(updatedExpenses.map(e => ({
+              id: e.id,
+              category: e.category,
+              amount: e.amount,
+              date: e.date,
+              description: e.description || "",
+              logged_by: e.payee || "Staff"
+            })));
+          }
+
+          if (updatedGenLogs.length > 0) {
+            await supabase.from("generator_logs").upsert(updatedGenLogs.map(g => ({
+              id: g.id,
+              date: g.date,
+              generator_name: "Maharaja Generator Set",
+              fuel_added: g.dieselAddedLitres,
+              runtime_hours: g.runHoursAdded,
+              operator_name: g.loggedBy || "Staff"
+            })));
+          }
+
+          if (updatedTasks.length > 0) {
+            await supabase.from("kanban_tasks").upsert(updatedTasks.map(t => ({
+              id: t.id,
+              title: t.title,
+              assignee: t.assignee,
+              due_date: t.date,
+              status: t.status,
+              priority: t.priority
+            })));
+          }
+
+          if (updatedAudits.length > 0) {
+            await supabase.from("audit_logs").upsert(updatedAudits.map(a => ({
+              id: a.id,
+              timestamp: a.timestamp,
+              "user": a.user,
+              action: a.action,
+              ip_address: a.ipAddress,
+              status: a.status
+            })));
+          }
+        } catch (error) {
+          console.error("Bhagyalaxmi ERP: Supabase Cloud Database sync error:", error);
+        }
+      };
+
+      syncCloud();
+    }
   };
 
   const hasPermission = (action: string): boolean => {
