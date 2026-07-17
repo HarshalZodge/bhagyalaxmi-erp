@@ -11,6 +11,7 @@ import {
   Activity,
   HardDrive,
   Cpu,
+  Trash2,
 } from "lucide-react";
 import { useERP } from "@/context/ERPContext";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -143,6 +144,19 @@ export const OwnerPanelView: React.FC = () => {
                 >
                   <RefreshCw size={14} className={dbSyncInProgress ? "animate-spin" : ""} />
                   {dbSyncInProgress ? "Synchronizing Cache..." : "Initiate Database Cloud Sync"}
+                </GlassButton>
+                
+                <GlassButton
+                  variant="secondary"
+                  onClick={() => {
+                    if (confirm("Are you sure you want to clear and reset the local storage database to default settings?")) {
+                      localStorage.clear();
+                      window.location.href = "/";
+                    }
+                  }}
+                  className="w-full mt-2 border-rose-200 bg-rose-500/10 text-rose-700 hover:bg-rose-500/20 py-2.5 flex items-center justify-center gap-2"
+                >
+                  <Trash2 size={14} /> Clear & Reset Local Database
                 </GlassButton>
               </div>
             </div>
