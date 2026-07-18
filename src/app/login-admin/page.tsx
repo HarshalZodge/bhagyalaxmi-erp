@@ -20,6 +20,18 @@ export default function LoginAdmin() {
   const [sandboxCodeMsg, setSandboxCodeMsg] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const err = params.get("error");
+      if (err === "unauthorized-email") {
+        setErrorMessage("Access Denied: Your Google account is not authorized to access this ERP system.");
+      } else if (err === "auth-callback-failed") {
+        setErrorMessage("Authentication failed. Please try again.");
+      }
+    }
+  }, []);
+
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
