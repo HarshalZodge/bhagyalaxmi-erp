@@ -26,15 +26,26 @@ create policy "Allow individual profile updates"
   using (auth.uid() = id)
   with check (auth.uid() = id);
 
+-- Helper function to check role bypassing RLS to avoid infinite recursion
+create or replace function public.is_admin_or_owner(user_id uuid)
+returns boolean as $$
+declare
+  is_admin boolean;
+begin
+  select exists (
+    select 1 from public.profiles
+    where id = user_id and role in ('Super Admin', 'Owner')
+  ) into is_admin;
+  return is_admin;
+end;
+$$ language plpgsql security definer;
+
 -- 3. Super Admin & Owner have write control over all user roles
 create policy "Allow owners/admins to update roles"
   on public.profiles for all
   to authenticated
   using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role in ('Super Admin', 'Owner')
-    )
+    public.is_admin_or_owner(auth.uid())
   );
 
 -- Create a trigger that automatically inserts profile logs on signup
