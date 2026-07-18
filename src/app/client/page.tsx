@@ -368,20 +368,8 @@ export default function ClientDashboard() {
                       </div>
 
                       <div className="space-y-2 text-xs">
-                        <div className="flex justify-between">
-                          <span className="text-charcoal-dark/50">Taxable Value:</span>
-                          <span className="font-semibold">₹{inv.taxableAmount.toLocaleString("en-IN")}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-charcoal-dark/50">CGST (9%):</span>
-                          <span>₹{inv.cgst.toLocaleString("en-IN")}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-charcoal-dark/50">SGST (9%):</span>
-                          <span>₹{inv.sgst.toLocaleString("en-IN")}</span>
-                        </div>
                         <div className="flex justify-between font-bold border-t border-purple-royal/5 pt-2 text-sm text-gold-dark">
-                          <span>Grand Total (incl. GST):</span>
+                          <span>Grand Total (GST Included):</span>
                           <span>₹{inv.totalAmount.toLocaleString("en-IN")}</span>
                         </div>
                       </div>

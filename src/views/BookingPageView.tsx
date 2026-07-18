@@ -200,10 +200,10 @@ export const BookingPageView: React.FC = () => {
   const discountAmount = configSettings.discountDefault;
   const taxableAmount = Math.max(0, subTotal - discountAmount);
   
-  // GST 18% (CGST 9% + SGST 9%)
-  const cgstAmount = Math.round(taxableAmount * 0.09);
-  const sgstAmount = Math.round(taxableAmount * 0.09);
-  const totalAmount = taxableAmount + cgstAmount + sgstAmount;
+  // GST is included in the base amount
+  const cgstAmount = 0;
+  const sgstAmount = 0;
+  const totalAmount = taxableAmount;
   
   // 20% advance required
   const advanceRequired = Math.round(totalAmount * 0.2);
@@ -1083,18 +1083,8 @@ export const BookingPageView: React.FC = () => {
                     <span>- ₹{discountAmount.toLocaleString("en-IN")}</span>
                   </div>
                 )}
-
-                <div className="flex justify-between text-[11px] font-semibold text-charcoal-dark/45 border-t border-dashed border-purple-royal/10 pt-2">
-                  <span>CGST (9%)</span>
-                  <span>₹{cgstAmount.toLocaleString("en-IN")}</span>
-                </div>
-                <div className="flex justify-between text-[11px] font-semibold text-charcoal-dark/45">
-                  <span>SGST (9%)</span>
-                  <span>₹{sgstAmount.toLocaleString("en-IN")}</span>
-                </div>
-
-                <div className="flex justify-between border-t border-purple-royal/15 pt-3 text-sm">
-                  <span className="font-extrabold text-gold-dark uppercase tracking-wide">Grand Total</span>
+                 <div className="flex justify-between border-t border-purple-royal/15 pt-3 text-sm">
+                  <span className="font-extrabold text-gold-dark uppercase tracking-wide">Grand Total (GST Included)</span>
                   <span className="font-black text-gold-dark text-base">₹{totalAmount.toLocaleString("en-IN")}</span>
                 </div>
                 <div className="flex justify-between text-[10px] font-bold text-purple-royal uppercase bg-purple-royal/5 p-2 rounded border border-purple-royal/10">

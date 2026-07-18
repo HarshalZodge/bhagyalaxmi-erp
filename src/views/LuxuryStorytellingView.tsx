@@ -199,7 +199,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
             <a href="#stage" className="hover:text-white transition-all">Stage</a>
             <a href="#event" className="hover:text-white transition-all">Event</a>
             <a href="#transformation" className="hover:text-white transition-all">Before/After</a>
-            <a href="#night" className="hover:text-white transition-all">Night</a>
+            <a href="#overview" className="hover:text-white transition-all">Overview</a>
             <a href="#gallery" className="hover:text-white transition-all">Gallery</a>
           </nav>
 
@@ -487,9 +487,9 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
       </section>
 
       {/* ==========================================
-          SECTION 7: NIGHT LIGHTING
+          SECTION 7: VENUE OVERVIEW (WHATSAPP VIDEO)
          ========================================== */}
-      <section id="night" className="py-24 bg-gradient-to-b from-[#FAF7F2] to-white border-y border-purple-royal/5">
+      <section id="overview" className="py-24 bg-gradient-to-b from-[#FAF7F2] to-white border-y border-purple-royal/5">
         <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, y: 35 }}
@@ -499,17 +499,17 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
             className="space-y-6"
           >
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37] flex items-center gap-1.5">
-              <Sparkles size={14} /> Evening Grandeur
+              <Sparkles size={14} /> Immersive Overview
             </span>
             <h2 className="text-3xl md:text-5xl font-black text-purple-royal tracking-tight uppercase leading-tight font-serif">
-              Night Session Lighting
+              Venue Overview
             </h2>
             <div className="h-0.5 w-20 bg-gradient-to-r from-gold-luxury to-purple-royal rounded" />
             <p className="text-sm md:text-base text-charcoal-dark/70 leading-relaxed pt-2">
-              As twilight falls over Ahilyanagar, Bhagyalaxmi Lawns transforms into a magical glowing estate. Our integrated light systems illuminate the lawns with elegant ambient tones and moving spotlights.
+              Get an intimate look at the visual ambiance and layout of our property. This exclusive overview showcases the flow of the venue, including guest corridors, entry portals, and seating zones.
             </p>
             <p className="text-sm text-charcoal-dark/65 leading-relaxed">
-              Press play on the walkthrough video to preview the premium lighting setups, generator support safety compliance, and dinner courtyard layout.
+              Press play to watch the cinematic walkthrough showcasing why Bhagyalaxmi Lawns is the most sought-after wedding destination.
             </p>
           </motion.div>
 
@@ -521,7 +521,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
               playsInline
               className="w-full h-full object-cover"
             >
-              <source src="/assets/videos/03_venue_walkthrough.mp4" type="video/mp4" />
+              <source src="/assets/videos/whatsapp_video.mp4" type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-black/35 flex flex-col justify-center items-center text-center p-6 z-10">
               <button
@@ -530,7 +530,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
               >
                 {walkthroughPlaying ? <Pause size={20} className="fill-current" /> : <Play size={20} className="ml-1 fill-current" />}
               </button>
-              <h3 className="text-lg font-serif text-white font-extrabold uppercase">Play Walkthrough</h3>
+              <h3 className="text-lg font-serif text-white font-extrabold uppercase">Play Overview</h3>
             </div>
           </div>
         </div>

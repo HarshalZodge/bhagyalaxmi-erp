@@ -242,16 +242,8 @@ export const InvoicePrintView: React.FC<InvoicePrintViewProps> = ({ request }) =
                 <span>- {formatINR(request.pricingBreakdown.discount)}</span>
               </div>
             )}
-            <div className="flex justify-between text-[11px]">
-              <span className="text-charcoal-dark/50">CGST (9%):</span>
-              <span>{formatINR(Math.round(taxAmt / 2))}</span>
-            </div>
-            <div className="flex justify-between text-[11px]">
-              <span className="text-charcoal-dark/50">SGST (9%):</span>
-              <span>{formatINR(Math.round(taxAmt / 2))}</span>
-            </div>
             <div className="flex justify-between font-extrabold text-purple-royal text-sm border-t border-purple-royal/10 pt-2 bg-purple-royal/5 p-2 rounded">
-              <span>Grand Total (incl. GST):</span>
+              <span>Grand Total (GST Included):</span>
               <span>{formatINR(request.pricingBreakdown.grandTotal)}</span>
             </div>
             <div className="flex justify-between text-[10px] font-bold text-gold-dark border-t border-dashed border-gold-luxury/35 pt-1.5">
