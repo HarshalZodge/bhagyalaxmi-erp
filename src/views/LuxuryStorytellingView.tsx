@@ -172,7 +172,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           <video
             autoPlay
             loop
-            muted={heroMuted}
+            muted
             playsInline
             className="w-full h-full object-cover scale-105"
           >
@@ -196,6 +196,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           <nav className="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-widest text-white/80">
             <a href="#entrance" className="hover:text-white transition-all">Entrance</a>
             <a href="#hall" className="hover:text-white transition-all">Hall</a>
+            <a href="#lawn" className="hover:text-white transition-all">Lawn</a>
             <a href="#stage" className="hover:text-white transition-all">Stage</a>
             <a href="#event" className="hover:text-white transition-all">Event</a>
             <a href="#transformation" className="hover:text-white transition-all">Before/After</a>
@@ -253,15 +254,9 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </motion.div>
         </div>
 
-        {/* Video Audio Control & Scroll Indicator */}
+        {/* Scroll Indicator */}
         <div className="relative z-20 px-6 py-6 md:px-12 flex justify-between items-center text-white/60 text-[10px] font-bold tracking-widest uppercase">
-          <button
-            onClick={() => setHeroMuted(!heroMuted)}
-            className="flex items-center gap-2 hover:text-white transition-all bg-black/30 backdrop-blur-md px-3.5 py-2 rounded-full border border-white/10"
-          >
-            {heroMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-            <span>{heroMuted ? "Sound Off" : "Sound On"}</span>
-          </button>
+          <div className="w-24" />
           
           <button
             onClick={scrollToIntro}
@@ -271,7 +266,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
             <ChevronDown size={14} />
           </button>
           
-          <span className="hidden md:inline bg-black/30 backdrop-blur-md px-3.5 py-2 rounded-full border border-white/10">
+          <span className="bg-black/30 backdrop-blur-md px-3.5 py-2 rounded-full border border-white/10">
             Bhingar, Ahilyanagar
           </span>
         </div>
@@ -362,7 +357,77 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
       </section>
 
       {/* ==========================================
-          SECTION 4: DECORATED STAGE
+          SECTION 4: ROYAL LAWN EXPERIENCE
+         ========================================== */}
+      <section id="lawn" className="py-24 bg-gradient-to-b from-white to-[#FAF7F2]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
+          <div className="text-center space-y-3">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Outdoor Splendor</span>
+            <h2 className="text-3xl md:text-5xl font-black text-purple-royal tracking-tight uppercase leading-none font-serif">
+              Royal Lawn Experience
+            </h2>
+            <div className="h-0.5 w-16 bg-gradient-to-r from-gold-luxury to-purple-royal rounded mx-auto" />
+            <p className="text-xs text-charcoal-dark/50 max-w-md mx-auto leading-normal">
+              Sprawling emerald green wedding lawns capable of accommodating grand receptions under the stars for thousands of guests.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Lawn Video Block */}
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-purple-royal/10 h-[400px]">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              >
+                <source src="/assets/videos/lawn2_1.mp4" type="video/mp4" />
+              </video>
+              <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+              <div className="absolute bottom-6 left-6 text-white z-10">
+                <span className="text-[10px] font-black uppercase tracking-widest text-amber-400">Emerald Lawns</span>
+                <h4 className="text-sm font-extrabold uppercase">Live Lawn Walkthrough</h4>
+              </div>
+            </div>
+
+            {/* Lawn Photos Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="relative rounded-2xl overflow-hidden shadow-md h-44 group">
+                <img
+                  src="/assets/images/lawn2_1.jpg"
+                  alt="Lawn View 1"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                />
+              </div>
+              <div className="relative rounded-2xl overflow-hidden shadow-md h-44 group">
+                <img
+                  src="/assets/images/lawn2_2.jpg"
+                  alt="Lawn View 2"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                />
+              </div>
+              <div className="relative rounded-2xl overflow-hidden shadow-md h-44 group">
+                <img
+                  src="/assets/images/lawn2_3.jpg"
+                  alt="Lawn View 3"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                />
+              </div>
+              <div className="relative rounded-2xl overflow-hidden shadow-md h-44 group">
+                <img
+                  src="/assets/images/lawn2_4.jpg"
+                  alt="Lawn View 4"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==========================================
+          SECTION 5: DECORATED STAGE
          ========================================== */}
       <section id="stage" className="py-24 px-6 md:px-12 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <motion.div
@@ -596,59 +661,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
         </div>
       </section>
 
-      {/* ==========================================
-          SECTION 6: VENDOR MARKETPLACE PREVIEW
-         ========================================== */}
-      <section id="marketplace" className="py-24 bg-gradient-to-b from-white to-[#FAF7F2]">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
-          <div className="text-center space-y-3">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Marketplace Preview</span>
-            <h2 className="text-3xl md:text-5xl font-black text-purple-royal tracking-tight uppercase leading-none font-serif">
-              Trusted Vendor Partners
-            </h2>
-            <div className="h-0.5 w-16 bg-gradient-to-r from-gold-luxury to-purple-royal rounded mx-auto" />
-            <p className="text-xs text-charcoal-dark/50 max-w-md mx-auto leading-normal">
-              Book curated photographers, food caterers, and decorators directly through our ERP system for extra benefits.
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {vendors.slice(0, 3).map((vendor) => (
-              <GlassCard key={vendor.id} className="p-6 border-white/60 bg-white/40 space-y-4 flex flex-col justify-between h-[360px]">
-                <div className="space-y-4">
-                  <div className="flex gap-3 items-center">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-white shrink-0 border border-purple-royal/10">
-                      <img src={vendor.logo} alt={vendor.name} className="w-full h-full object-cover" />
-                    </div>
-                    <div>
-                      <h4 className="font-extrabold text-sm text-purple-royal uppercase leading-tight">{vendor.name}</h4>
-                      <span className="text-[9px] uppercase tracking-wider font-bold text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/10 inline-block mt-0.5">
-                        {vendor.category}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-charcoal-dark/65 leading-relaxed">
-                    Offering special rates for Bhagyalaxmi packages, complete with custom configurations.
-                  </p>
-                </div>
-
-                <div className="space-y-3 pt-4 border-t border-purple-royal/10">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-charcoal-dark/50">Base Price:</span>
-                    <span className="text-purple-royal">₹{vendor.price.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-charcoal-dark/50">Rating:</span>
-                    <span className="flex items-center gap-0.5 font-bold text-amber-500">
-                      <Star size={12} className="fill-current" /> {vendor.rating} ({vendor.completedWeddings} events)
-                    </span>
-                  </div>
-                </div>
-              </GlassCard>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ==========================================
           SECTION 7: CUSTOMER TESTIMONIALS
@@ -669,8 +682,15 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
                 transition={{ duration: 0.6 }}
-                className="space-y-4"
+                className="space-y-4 animate-fade-in"
               >
+                <div className="flex justify-center gap-1 text-amber-400 mb-2">
+                  <Star size={16} className="fill-current" />
+                  <Star size={16} className="fill-current" />
+                  <Star size={16} className="fill-current" />
+                  <Star size={16} className="fill-current" />
+                  <Star size={16} className="fill-current" />
+                </div>
                 <p className="text-lg md:text-2xl font-medium font-serif italic leading-relaxed text-white/95">
                   "{testimonials[currentTestimonial].quote}"
                 </p>
@@ -775,11 +795,11 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
                 </span>
                 <span>Bhagyalaxmi Lawns, Bhingar-Cantonment, Ahilyanagar, Maharashtra 414002</span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <span className="p-3 bg-purple-royal/10 text-purple-royal rounded-xl">
                   <Phone size={16} />
                 </span>
-                <span>+91 98909 07454 / +91 98500 12345</span>
+                <span>+91 98909 07454 / +91 94222 38066 / +91 99602 81292</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="p-3 bg-purple-royal/10 text-purple-royal rounded-xl">
@@ -789,21 +809,27 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
               </div>
             </div>
 
-            {/* Simulated Map placeholder */}
-            <div className="relative rounded-3xl overflow-hidden border border-purple-royal/10 h-64 shadow-md bg-white">
+            {/* Interactive Map */}
+            <a
+              href="https://maps.app.goo.gl/9715gKuMyfcq9haD6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block relative rounded-3xl overflow-hidden border border-purple-royal/10 h-64 shadow-md bg-white hover:border-gold-luxury/40 transition-all group"
+            >
               <img
                 src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=600"
-                alt="Map Placeholder"
-                className="w-full h-full object-cover opacity-60 grayscale"
+                alt="Map View"
+                className="w-full h-full object-cover opacity-60 grayscale group-hover:scale-105 transition-all duration-700"
               />
               <div className="absolute inset-0 bg-purple-royal/10 backdrop-blur-[1px] flex flex-col justify-center items-center text-center p-4">
                 <MapPin size={32} className="text-purple-royal mb-2 animate-bounce" />
-                <h4 className="font-extrabold text-sm uppercase text-purple-royal">Ahilyanagar Junction</h4>
+                <h4 className="font-extrabold text-sm uppercase text-purple-royal">Bhagyalaxmi Lawns Location</h4>
                 <p className="text-[10px] text-charcoal-dark/60 mt-1 max-w-xs font-semibold leading-relaxed">
-                  Located near Bhingar Cantonment, just 10 minutes drive from Ahilyanagar Central Railway Station.
+                  Keshav Nagar, Pumping Station Road, Bhingar-Cantonment, Ahilyanagar.<br />
+                  <span className="text-amber-600 font-bold uppercase tracking-wider text-[9px] mt-1 inline-block border-b border-amber-600">Click to Open in Google Maps ↗</span>
                 </p>
               </div>
-            </div>
+            </a>
           </div>
 
           {/* Quick Contact Form */}
