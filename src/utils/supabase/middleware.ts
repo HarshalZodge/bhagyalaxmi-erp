@@ -32,11 +32,16 @@ export async function updateSession(request: NextRequest) {
 
   // If local sandbox, don't ping Supabase servers to prevent errors
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    return supabaseResponse;
+    return {
+      response: supabaseResponse,
+      role: null,
+      email: null
+    };
   }
 
   // Refresh auth session
   const { data: { user } } = await supabase.auth.getUser();
+  let role: string | null = null;
 
   if (user) {
     const authRoleCookie = request.cookies.get("bl_auth_role")?.value;
@@ -49,21 +54,26 @@ export async function updateSession(request: NextRequest) {
         .eq("id", user.id)
         .single();
 
-      const role = profile?.role || "Client";
+      const roleStr = profile?.role || "Client";
+      role = roleStr;
 
-      if (!authRoleCookie || !userEmailCookie || authRoleCookie !== role) {
+      if (!authRoleCookie || !userEmailCookie || authRoleCookie !== roleStr) {
         // Set cookies on response so the browser receives them
         supabaseResponse.cookies.set("bl_auth_email", user.email!, { path: "/", maxAge: 86400, sameSite: "lax" });
-        supabaseResponse.cookies.set("bl_auth_role", role, { path: "/", maxAge: 86400, sameSite: "lax" });
+        supabaseResponse.cookies.set("bl_auth_role", roleStr, { path: "/", maxAge: 86400, sameSite: "lax" });
 
         // Mutate request cookies so route guards in current middleware run see them
         request.cookies.set("bl_auth_email", user.email!);
-        request.cookies.set("bl_auth_role", role);
+        request.cookies.set("bl_auth_role", roleStr);
       }
     } catch (err) {
       console.error("Error fetching user profile in middleware:", err);
     }
   }
 
-  return supabaseResponse;
+  return {
+    response: supabaseResponse,
+    role,
+    email: user?.email || null
+  };
 }
