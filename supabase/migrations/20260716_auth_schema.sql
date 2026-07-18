@@ -48,10 +48,10 @@ begin
     coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
     new.raw_user_meta_data->>'avatar_url',
     -- Default first signup or specific emails to Owner, else Client
-    case 
-      when new.email in ('owner@bhagyalaxmi.com', 'admin@bhagyalaxmi.com', 'harshalzodge123@gmail.com', 'deepakzodge455@gmail.com', 'kiranzodge123@gmail.com') then 'Owner'::text
-      else 'Client'::text
-    end
+    CASE 
+      WHEN lower(NEW.email) IN ('owner@bhagyalaxmi.com', 'admin@bhagyalaxmi.com', 'harshalzodge123@gmail.com', 'deepakzodge455@gmail.com', 'kiranzodge123@gmail.com') THEN 'Owner'::text
+      ELSE 'Client'::text
+    END
   );
   return new;
 end;
