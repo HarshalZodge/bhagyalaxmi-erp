@@ -60,6 +60,28 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
   // FAQ Accordion State
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
+  // Before/After comparison slider states and handlers
+  const [sliderPos, setSliderPos] = useState(50);
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (sliderRef.current) {
+      const rect = sliderRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      setSliderPos(percentage);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (sliderRef.current && e.touches[0]) {
+      const rect = sliderRef.current.getBoundingClientRect();
+      const x = e.touches[0].clientX - rect.left;
+      const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      setSliderPos(percentage);
+    }
+  };
+
   const testimonials = [
     {
       quote: "Our wedding was a fairytale. The transition from the massive Royal Lawn to the grand air-conditioned banquet hall felt seamless. The Maharaja Grand Hall is simply unmatched in Ahilyanagar.",
@@ -131,7 +153,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
   };
 
   const scrollToIntro = () => {
-    const aboutSection = document.getElementById("about-heritage");
+    const aboutSection = document.getElementById("entrance");
     if (aboutSection) {
       aboutSection.scrollIntoView({ behavior: "smooth" });
     }
@@ -171,13 +193,14 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
             </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-white/80">
-            <a href="#about-heritage" className="hover:text-white transition-all">About</a>
-            <a href="#showcase" className="hover:text-white transition-all">Venues</a>
-            <a href="#inspirations" className="hover:text-white transition-all">Gallery</a>
-            <a href="#marketplace" className="hover:text-white transition-all">Vendors</a>
-            <a href="#faqs" className="hover:text-white transition-all">FAQ</a>
-            <a href="#contact" className="hover:text-white transition-all">Contact</a>
+          <nav className="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-widest text-white/80">
+            <a href="#entrance" className="hover:text-white transition-all">Entrance</a>
+            <a href="#hall" className="hover:text-white transition-all">Hall</a>
+            <a href="#stage" className="hover:text-white transition-all">Stage</a>
+            <a href="#event" className="hover:text-white transition-all">Event</a>
+            <a href="#transformation" className="hover:text-white transition-all">Before/After</a>
+            <a href="#night" className="hover:text-white transition-all">Night</a>
+            <a href="#gallery" className="hover:text-white transition-all">Gallery</a>
           </nav>
 
           <GlassButton
@@ -255,158 +278,242 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
       </section>
 
       {/* ==========================================
-          SECTION 2: ABOUT BHAGYALAXMI LAWNS
+          SECTION 2: GRAND ENTRANCE
          ========================================== */}
-      <section id="about-heritage" className="py-24 px-6 md:px-12 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section id="entrance" className="py-24 px-6 md:px-12 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1 }}
           className="space-y-6"
         >
           <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37] flex items-center gap-1.5">
-            <Award size={14} /> Elegant Heritage
+            <Sparkles size={14} /> First Impression
           </span>
           <h2 className="text-3xl md:text-5xl font-black text-purple-royal tracking-tight uppercase leading-tight font-serif">
-            A Majestic Venue for Grand Occasions
+            The Grand Entrance
           </h2>
           <div className="h-0.5 w-20 bg-gradient-to-r from-gold-luxury to-purple-royal rounded" />
           <p className="text-sm md:text-base text-charcoal-dark/70 leading-relaxed pt-2">
-            Located in the serene landscapes of Bhingar, Ahilyanagar, Bhagyalaxmi Lawns & Banquet Hall stands as the premier destination for grand celebrations. We specialize in curating experiences that blend absolute comfort with royal aesthetics, accommodating up to 3,700 guests.
+            As your guests arrive at Bhagyalaxmi Lawns, they are welcomed by a majestic portal of shimmering lights, welcoming warm spotlights, and beautifully landscaped floral pathways.
           </p>
           <p className="text-sm text-charcoal-dark/65 leading-relaxed">
-            Our state-of-the-art facilities include the fully air-conditioned Maharaja Grand Hall, sprawling emerald lawns, custom decorator frameworks, and centrally managed logistics ensuring that your milestone memories are handled flawlessly.
+            The entrance zone sets a premium mood of luxury and high hospitality. Paved walkways and vast structural facades allow for stunning arrivals, photography backdrops, and traditional welcoming bands.
           </p>
-          
-          <div className="grid grid-cols-3 gap-6 pt-4 text-center font-serif">
-            <div className="bg-white p-4 rounded-2xl border border-purple-royal/5 shadow-sm">
-              <p className="text-2xl md:text-3xl font-black text-purple-royal">3,700+</p>
-              <p className="text-[9px] uppercase font-bold text-charcoal-dark/50 mt-1">Capacity</p>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-purple-royal/5 shadow-sm">
-              <p className="text-2xl md:text-3xl font-black text-purple-royal">150+</p>
-              <p className="text-[9px] uppercase font-bold text-charcoal-dark/50 mt-1">Events Year</p>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-purple-royal/5 shadow-sm">
-              <p className="text-2xl md:text-3xl font-black text-purple-royal">100%</p>
-              <p className="text-[9px] uppercase font-bold text-charcoal-dark/50 mt-1">Satisfaction</p>
-            </div>
-          </div>
         </motion.div>
 
-        {/* Wedding Highlights Loop Video Block */}
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1 }}
-          className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/60 bg-white/40 h-[420px]"
+          className="relative rounded-3xl overflow-hidden shadow-2xl h-[400px] border border-purple-royal/10"
         >
+          <img
+            src="/assets/images/06_main_entrance.jpg"
+            alt="Grand Entrance"
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+      </section>
+
+      {/* ==========================================
+          SECTION 3: WIDE HALL VIEW
+         ========================================== */}
+      <section id="hall" className="py-24 bg-purple-royal/[0.01] border-y border-purple-royal/5">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+            className="relative rounded-3xl overflow-hidden shadow-2xl h-[400px] border border-purple-royal/10 order-2 lg:order-1"
+          >
+            <img
+              src="/assets/images/02_grand_hall_wide.jpg"
+              alt="Maharaja Grand Hall Wide View"
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+            className="space-y-6 order-1 lg:order-2"
+          >
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37] flex items-center gap-1.5">
+              <Award size={14} /> Opulent Scale
+            </span>
+            <h2 className="text-3xl md:text-5xl font-black text-purple-royal tracking-tight uppercase leading-tight font-serif">
+              Wide Hall View
+            </h2>
+            <div className="h-0.5 w-20 bg-gradient-to-r from-gold-luxury to-purple-royal rounded" />
+            <p className="text-sm md:text-base text-charcoal-dark/70 leading-relaxed pt-2">
+              Step inside the Maharaja Grand Hall—a breathtaking, column-free banquet space with central air conditioning, soaring high ceilings, and majestic chandeliers, perfectly designed to host up to 1,200 guests.
+            </p>
+            <p className="text-sm text-charcoal-dark/65 leading-relaxed">
+              Our architecture ensures clean, unobstructed sightlines from every single seat so that your family and guests feel intimately connected to the center stage during every wedding ritual.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ==========================================
+          SECTION 4: DECORATED STAGE
+         ========================================== */}
+      <section id="stage" className="py-24 px-6 md:px-12 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+          className="space-y-6"
+        >
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37] flex items-center gap-1.5">
+            <Heart size={14} /> Custom Setup
+          </span>
+          <h2 className="text-3xl md:text-5xl font-black text-purple-royal tracking-tight uppercase leading-tight font-serif">
+            Decorated Stages
+          </h2>
+          <div className="h-0.5 w-20 bg-gradient-to-r from-gold-luxury to-purple-royal rounded" />
+          <p className="text-sm md:text-base text-charcoal-dark/70 leading-relaxed pt-2">
+            Our creative decorators construct custom dream mandaps and stages, using premium materials, structural arches, imported roses, lilies, and intelligent backdrop lighting designs.
+          </p>
+          <p className="text-sm text-charcoal-dark/65 leading-relaxed">
+            From traditional marigold themes to bespoke contemporary setups, we provide the ultimate backdrop for your photographs and life-defining moments.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+          className="relative rounded-3xl overflow-hidden shadow-2xl h-[400px] border border-purple-royal/10"
+        >
+          <img
+            src="/assets/images/03_stage_purple_theme.jpg"
+            alt="Decorated Stage"
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+      </section>
+
+      {/* ==========================================
+          SECTION 5: REAL WEDDING EVENT
+         ========================================== */}
+      <section id="event" className="py-32 bg-purple-royal text-white text-center relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
           <video
             autoPlay
             loop
             muted
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover opacity-25 scale-105"
           >
             <source src="/assets/videos/02_wedding_highlights.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-          <div className="absolute bottom-6 left-6 z-10 text-white space-y-1">
-            <span className="text-[9px] uppercase tracking-widest font-black text-amber-400">Wedding Highlights</span>
-            <h4 className="text-sm font-extrabold uppercase tracking-wider">A Glimpse of the Magic</h4>
-          </div>
-        </motion.div>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1C1613]/80 via-transparent to-[#1C1613]/90 z-10" />
+        </div>
+        
+        <div className="max-w-4xl mx-auto space-y-6 relative z-20 px-6">
+          <span className="text-xs font-bold uppercase tracking-[0.25em] text-amber-400">Live Energy</span>
+          <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight font-serif">
+            Real Wedding Experiences
+          </h2>
+          <div className="h-0.5 w-16 bg-amber-400 rounded mx-auto" />
+          <p className="text-sm md:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed">
+            Experience the grandeur, joy, music, and vibrant atmosphere of a live wedding celebration hosted at Bhagyalaxmi Lawns. Our venues deliver memories that endure for generations.
+          </p>
+        </div>
       </section>
 
       {/* ==========================================
-          SECTION 3: VENUE SHOWCASE (HALL & LAWN)
+          SECTION 6: EMPTY HALL -> DECORATED COMPARISON
          ========================================== */}
-      <section id="showcase" className="py-24 bg-gradient-to-b from-[#FAF7F2] to-white">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
+      <section id="transformation" className="py-24 bg-[#FAF7F2] border-t border-purple-royal/5">
+        <div className="max-w-5xl mx-auto px-6 md:px-12 space-y-12">
           <div className="text-center space-y-3">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Explore Spaces</span>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Visual Metamorphosis</span>
             <h2 className="text-3xl md:text-5xl font-black text-purple-royal tracking-tight uppercase leading-none font-serif">
-              Our Curated Venues
+              Raw Canvas vs Decorated Masterpiece
             </h2>
             <div className="h-0.5 w-16 bg-gradient-to-r from-gold-luxury to-purple-royal rounded mx-auto" />
             <p className="text-xs text-charcoal-dark/50 max-w-md mx-auto leading-normal">
-              Select the ideal setting for your ceremony. Host grand indoor wedding banquets or royal outdoor garden receptions.
+              Hover and slide your cursor/touch across the frame to watch our empty grand hall morph into a decorated, high-energy wedding celebration.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            {/* Space 1: Maharaja Grand Hall */}
-            <motion.div
-              whileHover={{ y: -5 }}
-              className="bg-white/40 border border-purple-royal/5 rounded-3xl overflow-hidden shadow-lg flex flex-col h-[520px]"
-            >
-              <div className="relative h-72 overflow-hidden shrink-0">
-                <img
-                  src="/assets/images/02_grand_hall_wide.jpg"
-                  alt="Maharaja Grand Hall"
-                  className="w-full h-full object-cover hover:scale-105 transition-all duration-700"
-                />
-                <span className="absolute top-4 left-4 bg-purple-royal/85 backdrop-blur-md px-3.5 py-1.5 rounded-xl text-white text-[9px] font-black uppercase tracking-widest border border-white/10">
-                  Indoor Grand Hall
-                </span>
-              </div>
-              <div className="p-6 flex-grow flex flex-col justify-between space-y-4 bg-white/60">
-                <div className="space-y-2">
-                  <h3 className="text-xl font-extrabold text-purple-royal uppercase">Maharaja Grand Hall</h3>
-                  <p className="text-xs text-charcoal-dark/60 leading-relaxed">
-                    Designed for grand Indian weddings, this opulent AC hall features luxury chandeliers, a massive stage setup, and premium acoustic dynamics.
-                  </p>
-                </div>
-                <div className="flex justify-between items-center border-t border-purple-royal/10 pt-4 text-xs font-bold">
-                  <span className="flex items-center gap-1 text-charcoal-dark/50">
-                    <Users size={14} className="text-gold-luxury" /> Capacity: 1,200
-                  </span>
-                  <span className="text-purple-royal">
-                    Base Price: ₹{configSettings.hallPrice.toLocaleString("en-IN")}
-                  </span>
-                </div>
-              </div>
-            </motion.div>
+          <div
+            ref={sliderRef}
+            onMouseMove={handleMouseMove}
+            onTouchMove={handleTouchMove}
+            className="relative h-[480px] w-full rounded-3xl overflow-hidden shadow-2xl cursor-ew-resize select-none border border-purple-royal/10"
+          >
+            {/* Base Image (Empty Hall) */}
+            <img
+              src="/assets/images/05_empty_hall.jpg"
+              alt="Empty Hall"
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            />
 
-            {/* Space 2: Royal Lawns */}
-            <motion.div
-              whileHover={{ y: -5 }}
-              className="bg-white/40 border border-purple-royal/5 rounded-3xl overflow-hidden shadow-lg flex flex-col h-[520px]"
+            {/* Overlapping Image (Decorated Event) */}
+            <div
+              className="absolute inset-0 overflow-hidden pointer-events-none"
+              style={{ width: `${sliderPos}%` }}
             >
-              <div className="relative h-72 overflow-hidden shrink-0">
-                <img
-                  src="/assets/images/01_hall_event_view.jpg"
-                  alt="Royal Lawns"
-                  className="w-full h-full object-cover hover:scale-105 transition-all duration-700"
-                />
-                <span className="absolute top-4 left-4 bg-amber-600/85 backdrop-blur-md px-3.5 py-1.5 rounded-xl text-white text-[9px] font-black uppercase tracking-widest border border-white/10">
-                  Open-Air Lawn
-                </span>
+              <img
+                src="/assets/images/01_hall_event_view.jpg"
+                alt="Decorated Hall"
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none max-w-none"
+                style={{ width: sliderRef.current ? sliderRef.current.getBoundingClientRect().width : "100%" }}
+              />
+            </div>
+
+            {/* Divider Line */}
+            <div
+              className="absolute top-0 bottom-0 w-1 bg-amber-400 shadow-xl pointer-events-none"
+              style={{ left: `${sliderPos}%` }}
+            >
+              <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-amber-400 border-2 border-white shadow flex items-center justify-center text-[10px] font-black text-purple-royal">
+                ↔
               </div>
-              <div className="p-6 flex-grow flex flex-col justify-between space-y-4 bg-white/60">
-                <div className="space-y-2">
-                  <h3 className="text-xl font-extrabold text-purple-royal uppercase">Royal Lawns</h3>
-                  <p className="text-xs text-charcoal-dark/60 leading-relaxed">
-                    Host a starry night reception under the sky. Our emerald lawn combined with the banquet hall sets a breathtaking scene for thousands of guests.
-                  </p>
-                </div>
-                <div className="flex justify-between items-center border-t border-purple-royal/10 pt-4 text-xs font-bold">
-                  <span className="flex items-center gap-1 text-charcoal-dark/50">
-                    <Users size={14} className="text-gold-luxury" /> Capacity: 2,500
-                  </span>
-                  <span className="text-purple-royal">
-                    Combined Price: ₹{configSettings.hallLawnPrice.toLocaleString("en-IN")}
-                  </span>
-                </div>
-              </div>
-            </motion.div>
+            </div>
           </div>
+        </div>
+      </section>
 
-          {/* Interactive Walkthrough Video section */}
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-purple-royal/10 h-[380px] mt-12">
+      {/* ==========================================
+          SECTION 7: NIGHT LIGHTING
+         ========================================== */}
+      <section id="night" className="py-24 bg-gradient-to-b from-[#FAF7F2] to-white border-y border-purple-royal/5">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+            className="space-y-6"
+          >
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37] flex items-center gap-1.5">
+              <Sparkles size={14} /> Evening Grandeur
+            </span>
+            <h2 className="text-3xl md:text-5xl font-black text-purple-royal tracking-tight uppercase leading-tight font-serif">
+              Night Session Lighting
+            </h2>
+            <div className="h-0.5 w-20 bg-gradient-to-r from-gold-luxury to-purple-royal rounded" />
+            <p className="text-sm md:text-base text-charcoal-dark/70 leading-relaxed pt-2">
+              As twilight falls over Ahilyanagar, Bhagyalaxmi Lawns transforms into a magical glowing estate. Our integrated light systems illuminate the lawns with elegant ambient tones and moving spotlights.
+            </p>
+            <p className="text-sm text-charcoal-dark/65 leading-relaxed">
+              Press play on the walkthrough video to preview the premium lighting setups, generator support safety compliance, and dinner courtyard layout.
+            </p>
+          </motion.div>
+
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-purple-royal/10 h-[380px]">
             <video
               ref={walkthroughVideoRef}
               loop
@@ -423,74 +530,24 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
               >
                 {walkthroughPlaying ? <Pause size={20} className="fill-current" /> : <Play size={20} className="ml-1 fill-current" />}
               </button>
-              <h3 className="text-2xl font-serif text-white font-extrabold uppercase">Full Venue Walkthrough</h3>
-              <p className="text-xs text-white/80 max-w-md mt-2 font-medium leading-relaxed">
-                Take an immersive visual stroll through the entrance portal, grand ballroom, guest chambers, and landscaping.
-              </p>
+              <h3 className="text-lg font-serif text-white font-extrabold uppercase">Play Walkthrough</h3>
             </div>
           </div>
         </div>
       </section>
 
       {/* ==========================================
-          SECTION 4: WHY CHOOSE US
+          SECTION 8: GALLERY (INSPIRATION)
          ========================================== */}
-      <section className="py-24 px-6 md:px-12 bg-purple-royal/[0.02] border-y border-purple-royal/5">
-        <div className="max-w-7xl mx-auto space-y-16">
-          <div className="text-center space-y-3">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Premium Features</span>
-            <h2 className="text-3xl md:text-5xl font-black text-purple-royal tracking-tight uppercase leading-none font-serif">
-              Why Choose Bhagyalaxmi
-            </h2>
-            <div className="h-0.5 w-16 bg-gradient-to-r from-gold-luxury to-purple-royal rounded mx-auto" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-purple-royal/5 space-y-4">
-              <span className="p-3 bg-purple-royal/10 text-purple-royal rounded-2xl inline-block">
-                <Users size={20} />
-              </span>
-              <h3 className="text-lg font-bold text-purple-royal uppercase">Host Up to 3,700 Guests</h3>
-              <p className="text-xs text-charcoal-dark/65 leading-relaxed">
-                No need to cut down your invite list. Our open lawns and banquet hall are specifically engineered to accommodate huge crowds without crowding.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-purple-royal/5 space-y-4">
-              <span className="p-3 bg-amber-500/10 text-amber-600 rounded-2xl inline-block">
-                <ShieldCheck size={20} />
-              </span>
-              <h3 className="text-lg font-bold text-purple-royal uppercase">24/7 Security & Supervision</h3>
-              <p className="text-xs text-charcoal-dark/65 leading-relaxed">
-                Your family and valuables are safe with us. We have active CCTV grids, on-site fire compliance, and professional guards deployed across parking zones.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-purple-royal/5 space-y-4">
-              <span className="p-3 bg-purple-royal/10 text-purple-royal rounded-2xl inline-block">
-                <Utensils size={20} />
-              </span>
-              <h3 className="text-lg font-bold text-purple-royal uppercase">Luxurious AC Guest Chambers</h3>
-              <p className="text-xs text-charcoal-dark/65 leading-relaxed">
-                Equipped with centrally air-conditioned master suites for the bride, groom, and immediate relatives, complete with luxury makeup desks and lounges.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ==========================================
-          SECTION 5: WEDDING INSPIRATION GALLERY
-         ========================================== */}
-      <section id="inspirations" className="py-24 max-w-7xl mx-auto px-6 md:px-12 space-y-16">
+      <section id="gallery" className="py-24 max-w-7xl mx-auto px-6 md:px-12 space-y-16">
         <div className="text-center space-y-3">
           <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37]">Visual Gallery</span>
           <h2 className="text-3xl md:text-5xl font-black text-purple-royal tracking-tight uppercase leading-none font-serif">
-            Wedding Inspiration
+            Wedding Inspiration Gallery
           </h2>
           <div className="h-0.5 w-16 bg-gradient-to-r from-gold-luxury to-purple-royal rounded mx-auto" />
           <p className="text-xs text-charcoal-dark/50 max-w-md mx-auto leading-normal">
-            Browse through actual mandap setups, royal theme stages, and lighting styles designed on-site.
+            A curated look at actual mandap setups, royal theme stages, and lighting styles designed on-site.
           </p>
         </div>
 
