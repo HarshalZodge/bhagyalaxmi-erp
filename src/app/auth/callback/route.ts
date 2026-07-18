@@ -20,7 +20,9 @@ export async function GET(request: Request) {
       // Fetch user to verify email whitelist
       const { data: { user } } = await supabase.auth.getUser();
       if (user && user.email) {
-        if (!ALLOWED_EMAILS.includes(user.email.toLowerCase())) {
+        // Enforce whitelisted emails ONLY for Admin command center logins
+        const isLoggingInAsAdmin = next.startsWith("/admin");
+        if (isLoggingInAsAdmin && !ALLOWED_EMAILS.includes(user.email.toLowerCase())) {
           // Unauthorized email: sign out immediately and redirect to login page with error
           await supabase.auth.signOut();
           return NextResponse.redirect(`${origin}/login-admin?error=unauthorized-email`);
@@ -32,6 +34,7 @@ export async function GET(request: Request) {
     }
   }
 
-  // On error, send user back to the login screen with an error parameter
-  return NextResponse.redirect(`${origin}/login-admin?error=auth-callback-failed`);
+  // On error, send user back to the appropriate login screen
+  const errorRedirectTarget = next.startsWith("/client") ? "/login-client" : "/login-admin";
+  return NextResponse.redirect(`${origin}${errorRedirectTarget}?error=auth-callback-failed`);
 }
