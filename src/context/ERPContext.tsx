@@ -287,6 +287,7 @@ interface ERPContextType {
   updateVendor: (id: string, vendor: Partial<Vendor>) => void;
   updateConfigSettings: (settings: Partial<ERPConfig>) => void;
   clearAllDatabaseData: () => Promise<void>;
+  dbError: string | null;
 }
 
 const ERPContext = createContext<ERPContextType | undefined>(undefined);
@@ -346,6 +347,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const supabase = createClient();
+  const [dbError, setDbError] = useState<string | null>(null);
 
   const setAuthCookies = (email: string, role: string) => {
     document.cookie = `bl_auth_email=${email}; path=/; max-age=86400; SameSite=Lax`;
@@ -462,11 +464,18 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (isSupabaseConfigured) {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          const { data: profile } = await supabase
+          const { data: profile, error: pErr } = await supabase
             .from("profiles")
             .select("role, name, avatar_url")
             .eq("id", session.user.id)
             .single();
+
+          if (pErr) {
+            setDbError(JSON.stringify(pErr));
+            console.error("ERP Auth error:", pErr);
+          } else {
+            setDbError(null);
+          }
 
           const role = (profile?.role || "Client") as UserRole;
           const userSession: UserSession = {
@@ -494,11 +503,18 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (isSupabaseConfigured) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === "SIGNED_IN" && session) {
-          const { data: profile } = await supabase
+          const { data: profile, error: pErr } = await supabase
             .from("profiles")
             .select("role, name, avatar_url")
             .eq("id", session.user.id)
             .single();
+
+          if (pErr) {
+            setDbError(JSON.stringify(pErr));
+            console.error("ERP Auth onAuthStateChange error:", pErr);
+          } else {
+            setDbError(null);
+          }
 
           const role = (profile?.role || "Client") as UserRole;
           const userSession: UserSession = {
@@ -512,6 +528,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } else if (event === "SIGNED_OUT") {
           setUser(null);
           clearAuthCookies();
+          setDbError(null);
         }
       });
       return () => subscription.unsubscribe();
@@ -2088,6 +2105,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateVendor,
         updateConfigSettings,
         clearAllDatabaseData,
+        dbError,
       }}
     >
       {children}

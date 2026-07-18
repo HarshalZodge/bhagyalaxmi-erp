@@ -32,6 +32,7 @@ export default function ClientDashboard() {
     authLoading,
     bookingRequests,
     convertRequestToBooking,
+    dbError,
   } = useERP();
 
   // Find request associated with this client email
@@ -131,6 +132,9 @@ export default function ClientDashboard() {
             <p>Email: <strong className="font-bold">{user?.email}</strong></p>
             <p>Role: <strong className="font-bold">{user?.role}</strong></p>
             <p>Supabase URL: <strong className="font-bold">{process.env.NEXT_PUBLIC_SUPABASE_URL}</strong></p>
+            {dbError && (
+              <p className="text-rose-600 font-semibold mt-1">DB Fetch Error: {dbError}</p>
+            )}
           </div>
 
           {/* VIEW: DASHBOARD */}
