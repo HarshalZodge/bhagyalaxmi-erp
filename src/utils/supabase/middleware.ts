@@ -42,16 +42,16 @@ export async function updateSession(request: NextRequest) {
     const authRoleCookie = request.cookies.get("bl_auth_role")?.value;
     const userEmailCookie = request.cookies.get("bl_auth_email")?.value;
 
-    if (!authRoleCookie || !userEmailCookie) {
-      try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
 
-        const role = profile?.role || "Client";
+      const role = profile?.role || "Client";
 
+      if (!authRoleCookie || !userEmailCookie || authRoleCookie !== role) {
         // Set cookies on response so the browser receives them
         supabaseResponse.cookies.set("bl_auth_email", user.email!, { path: "/", maxAge: 86400, sameSite: "lax" });
         supabaseResponse.cookies.set("bl_auth_role", role, { path: "/", maxAge: 86400, sameSite: "lax" });
@@ -59,9 +59,9 @@ export async function updateSession(request: NextRequest) {
         // Mutate request cookies so route guards in current middleware run see them
         request.cookies.set("bl_auth_email", user.email!);
         request.cookies.set("bl_auth_role", role);
-      } catch (err) {
-        console.error("Error fetching user profile in middleware:", err);
       }
+    } catch (err) {
+      console.error("Error fetching user profile in middleware:", err);
     }
   }
 
