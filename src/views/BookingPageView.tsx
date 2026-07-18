@@ -35,6 +35,7 @@ import { GlassInput } from "@/components/ui/GlassInput";
 import { GlassSelect } from "@/components/ui/GlassSelect";
 import { GlassModal } from "@/components/ui/GlassModal";
 import confetti from "canvas-confetti";
+import { LuxuryStorytellingView } from "./LuxuryStorytellingView";
 
 export const BookingPageView: React.FC = () => {
   const {
@@ -46,6 +47,9 @@ export const BookingPageView: React.FC = () => {
     bookingRequests,
   } = useERP();
 
+  // Show luxury intro story if on the client-facing portal, bypass for admin/staff
+  const isAdminPortal = typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
+  const [showIntro, setShowIntro] = useState(!isAdminPortal);
   const [step, setStep] = useState(1);
 
   // --- FORM STATES ---
@@ -329,6 +333,10 @@ export const BookingPageView: React.FC = () => {
     { id: 8, label: "Quote Builder" },
     { id: 9, label: "Review" },
   ];
+
+  if (showIntro) {
+    return <LuxuryStorytellingView onStartBooking={() => setShowIntro(false)} />;
+  }
 
   return (
     <div className="space-y-6 pb-12 animate-fade-in select-none">
