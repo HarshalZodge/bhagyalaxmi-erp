@@ -24,6 +24,7 @@ export const OwnerPanelView: React.FC = () => {
     dbSyncInProgress,
     lastSyncTime,
     syncDatabase,
+    clearAllDatabaseData,
   } = useERP();
 
   // Mock staff roles listing
@@ -148,15 +149,15 @@ export const OwnerPanelView: React.FC = () => {
                 
                 <GlassButton
                   variant="secondary"
-                  onClick={() => {
-                    if (confirm("Are you sure you want to clear and reset the local storage database to default settings?")) {
-                      localStorage.clear();
+                  onClick={async () => {
+                    if (confirm("Are you sure you want to clear all local cache and delete all database client/booking records? This cannot be undone.")) {
+                      await clearAllDatabaseData();
                       window.location.href = "/";
                     }
                   }}
                   className="w-full mt-2 border-rose-200 bg-rose-500/10 text-rose-700 hover:bg-rose-500/20 py-2.5 flex items-center justify-center gap-2"
                 >
-                  <Trash2 size={14} /> Clear & Reset Local Database
+                  <Trash2 size={14} /> Clear & Reset All Databases
                 </GlassButton>
               </div>
             </div>

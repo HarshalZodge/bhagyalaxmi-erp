@@ -286,6 +286,7 @@ interface ERPContextType {
   addVendor: (vendor: Omit<Vendor, "id">) => void;
   updateVendor: (id: string, vendor: Partial<Vendor>) => void;
   updateConfigSettings: (settings: Partial<ERPConfig>) => void;
+  clearAllDatabaseData: () => Promise<void>;
 }
 
 const ERPContext = createContext<ERPContextType | undefined>(undefined);
@@ -655,6 +656,37 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               status: a.status,
             })));
           }
+
+          const { data: cData } = await supabase.from("customers").select("*");
+          if (cData && cData.length > 0) {
+            setCustomers(cData.map(c => ({
+              id: c.id,
+              name: c.name,
+              photo: c.photo || "https://images.unsplash.com/photo-1621574539437-4b7cb63120b8?auto=format&fit=crop&q=80&w=200",
+              phone: c.phone,
+              email: c.email,
+              address: c.address || "",
+              totalSpent: c.total_spent || 0,
+              bookingCount: c.booking_count || 0,
+              notes: c.notes || [],
+              whatsappHistory: c.whatsapp_history || [],
+            })));
+          }
+
+          const { data: configData } = await supabase.from("erp_config").select("*").eq("id", "default").maybeSingle();
+          if (configData) {
+            setConfigSettings({
+              hallPrice: configData.hall_price,
+              hallLawnPrice: configData.hall_lawn_price,
+              generatorCostPerHour: configData.generator_cost_per_hour,
+              electricityCostPerUnit: configData.electricity_cost_per_unit,
+              gstPercentage: configData.gst_percentage,
+              discountDefault: configData.discount_default,
+              invoiceTemplate: configData.invoice_template,
+              vendorCategories: configData.vendor_categories,
+              packageTemplates: configData.package_templates,
+            });
+          }
         } catch (err) {
           console.error("Bhagyalaxmi ERP: Error loading Supabase tables:", err);
         }
@@ -687,158 +719,14 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setVendors(JSON.parse(cachedVendors));
       setConfigSettings(JSON.parse(cachedConfig));
     } else {
-      const seedBookings: Booking[] = [
-        {
-          id: "b-1",
-          customerName: "Aditi & Rahul's Royal Wedding",
-          customerPhoto: "https://images.unsplash.com/photo-1621574539437-4b7cb63120b8?auto=format&fit=crop&q=80&w=200",
-          venueName: "Maharaja Grand Hall",
-          bookingType: "Wedding",
-          bookingDate: "2026-07-20",
-          guestCount: 1200,
-          amount: 1250000,
-          status: "Confirmed",
-          progress: 85,
-          packageSelected: "Royal",
-          phoneNumber: "+91 98220 12345",
-          email: "rahul.deshmukh@gmail.com",
-        },
-        {
-          id: "b-2",
-          customerName: "Deshmukh Family Reception",
-          customerPhoto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200",
-          venueName: "Maharaja Grand Hall + Royal Lawns",
-          bookingType: "Reception",
-          bookingDate: "2026-07-21",
-          guestCount: 3700,
-          amount: 1800000,
-          status: "Pending Payment",
-          progress: 60,
-          packageSelected: "Gold",
-          phoneNumber: "+91 94220 54321",
-          email: "patil.vijay@outlook.com",
-        }
-      ];
-
-      const seedCustomers: Customer[] = [
-        {
-          id: "c-1",
-          name: "Rahul Deshmukh",
-          photo: "https://images.unsplash.com/photo-1621574539437-4b7cb63120b8?auto=format&fit=crop&q=80&w=200",
-          phone: "+91 98220 12345",
-          email: "rahul.deshmukh@gmail.com",
-          address: "Savedi, Ahilyanagar, Maharashtra",
-          totalSpent: 1250000,
-          bookingCount: 1,
-          notes: [
-            { id: "n-1", date: "2026-07-10", text: "Requested premium stage lights and royal entrance decoration." },
-            { id: "n-2", date: "2026-07-12", text: "Catering menu finalized with 14 items including Puran Poli and Amrakhand." }
-          ],
-          whatsappHistory: [
-            { id: "w-1", sender: "owner", text: "Namaskar Rahul ji, hope you liked our Royal package brochure.", timestamp: "2026-07-09T10:00:00Z" },
-            { id: "w-2", sender: "customer", text: "Yes, it looks beautiful. We want to confirm the booking for Maharaja Grand Hall on 20th July.", timestamp: "2026-07-09T10:15:00Z" }
-          ]
-        }
-      ];
-
-      const seedInvoices: Invoice[] = [
-        {
-          id: "inv-1",
-          invoiceNo: "BL-2026-001",
-          clientName: "Rahul Deshmukh",
-          date: "2026-07-10",
-          bookingId: "b-1",
-          bookingType: "Wedding",
-          taxableAmount: 1059322,
-          cgst: 95339,
-          sgst: 95339,
-          totalAmount: 1250000,
-          status: "Paid",
-        }
-      ];
-
-      const seedExpenses: Expense[] = [
-        {
-          id: "exp-1",
-          category: "Florist",
-          amount: 85000,
-          description: "Rose and Marigold flowers decoration for Maharaja Hall entrance",
-          date: "2026-07-12",
-          payee: "Ahilya Florists & Decorators",
-        }
-      ];
-
-      const seedGenLogs: GeneratorLog[] = [
-        {
-          id: "g-1",
-          date: "2026-07-02",
-          dieselAddedLitres: 150,
-          costPerLitre: 98.5,
-          totalCost: 14775,
-          runHoursAdded: 12,
-          fuelLevelAfter: 95,
-          loggedBy: "Sanjay Shinde (Supervisor)",
-        }
-      ];
-
-      const seedTasks: KanbanTask[] = [
-        {
-          id: "t-1",
-          title: "Setup stage sound system",
-          category: "Audio",
-          description: "Ensure JBL sound speakers are mounted and calibrated for the Maharaja Grand Hall event.",
-          assignee: "Satish More",
-          status: "Todo",
-          priority: "High",
-          date: "2026-07-16"
-        }
-      ];
-
-      const seedAudits: AuditLog[] = [
-        {
-          id: "l-1",
-          timestamp: "2026-07-16T19:40:00Z",
-          user: "Owner (admin)",
-          action: "Generated GST Invoice BL-2026-003",
-          ipAddress: "192.168.1.42",
-          status: "Success"
-        }
-      ];
-
-      const seedRequests: BookingRequest[] = [
-        {
-          id: "req-1",
-          customerName: "Karan & Priya's Royal Sangeet",
-          phoneNumber: "+91 99602 81292",
-          email: "customer.deshmukh@gmail.com",
-          venue: "Hall + Lawn",
-          eventType: "Reception",
-          eventDate: "2026-07-28",
-          eventSession: "Night",
-          guests: 2500,
-          packageSelected: "Royal",
-          vendors: {
-            "Decoration": { type: "system", vendorId: "v-decor-1", name: "Ahilya Florists & Decorators" },
-            "Food Catering": { type: "system", vendorId: "v-catering-1", name: "Bhagyalaxmi Pure Veg Caterers" },
-            "Photography": { type: "system", vendorId: "v-photo-1", name: "Ahilya Wedding Studio" }
-          },
-          additionalServices: ["Guest Rooms", "Valet Parking", "LED Wall", "Fireworks"],
-          pricingBreakdown: {
-            venue: 130000,
-            package: 1125000, // 2500 * 450
-            vendors: 25000 + 875000 + 40000,
-            services: 15000,
-            generatorHours: 0,
-            electricityUnits: 0,
-            discount: 50000,
-            gst: 387000,
-            grandTotal: 2547000,
-            advance: 509400,
-          },
-          status: "Pending",
-          createdAt: new Date().toISOString()
-        }
-      ];
+      const seedBookings: Booking[] = [];
+      const seedCustomers: Customer[] = [];
+      const seedInvoices: Invoice[] = [];
+      const seedExpenses: Expense[] = [];
+      const seedGenLogs: GeneratorLog[] = [];
+      const seedTasks: KanbanTask[] = [];
+      const seedAudits: AuditLog[] = [];
+      const seedRequests: BookingRequest[] = [];
 
       const seedVendors: Vendor[] = [
         {
@@ -996,135 +884,6 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem("bl_booking_requests", JSON.stringify(updatedRequests || bookingRequests));
     localStorage.setItem("bl_vendors", JSON.stringify(updatedVendors || vendors));
     localStorage.setItem("bl_config", JSON.stringify(updatedConfig || configSettings));
-
-    // Cloud integration sync
-    if (isSupabaseConfigured) {
-      const syncCloud = async () => {
-        try {
-          if (updatedBookings.length > 0) {
-            await supabase.from("bookings").upsert(updatedBookings.map(b => ({
-              id: b.id,
-              customer_name: b.customerName,
-              customer_photo: b.customerPhoto,
-              email: b.email,
-              phone_number: b.phoneNumber,
-              venue_name: b.venueName,
-              booking_date: b.bookingDate,
-              guest_count: b.guestCount,
-              amount: b.amount,
-              advance_paid: 0,
-              status: b.status,
-              progress: b.progress,
-              package_selected: b.packageSelected
-            })));
-          }
-
-          const reqs = updatedRequests || bookingRequests;
-          if (reqs.length > 0) {
-            await supabase.from("booking_requests").upsert(reqs.map(r => ({
-              id: r.id,
-              customer_name: r.customerName,
-              phone_number: r.phoneNumber,
-              email: r.email,
-              venue: r.venue,
-              event_type: r.eventType,
-              event_date: r.eventDate,
-              event_session: r.eventSession,
-              guests: r.guests,
-              package_selected: r.packageSelected,
-              vendors: r.vendors,
-              additional_services: r.additionalServices,
-              pricing_breakdown: r.pricingBreakdown,
-              status: r.status
-            })));
-          }
-
-          const vdrs = updatedVendors || vendors;
-          if (vdrs.length > 0) {
-            await supabase.from("vendors").upsert(vdrs.map(v => ({
-              id: v.id,
-              name: v.name,
-              category: v.category,
-              logo: v.logo,
-              cover_image: v.coverImage,
-              price: v.price,
-              location: v.location,
-              phone: v.phone,
-              email: v.email,
-              instagram: v.instagram,
-              whatsapp: v.whatsapp,
-              commission_percentage: v.commissionPercentage,
-              rating: v.rating,
-              completed_weddings: v.completedWeddings,
-              featured: v.featured,
-              gallery: v.gallery,
-              menu_items: v.menuItems,
-              photography_portfolio: v.photographyPortfolio
-            })));
-          }
-
-          if (updatedInvoices.length > 0) {
-            await supabase.from("invoices").upsert(updatedInvoices.map(i => ({
-              id: i.id,
-              booking_id: i.bookingId,
-              client_name: i.clientName,
-              date: i.date,
-              amount: i.totalAmount,
-              status: i.status,
-              gst_number: ""
-            })));
-          }
-
-          if (updatedExpenses.length > 0) {
-            await supabase.from("expenses").upsert(updatedExpenses.map(e => ({
-              id: e.id,
-              category: e.category,
-              amount: e.amount,
-              date: e.date,
-              description: e.description || "",
-              logged_by: e.payee || "Staff"
-            })));
-          }
-
-          if (updatedGenLogs.length > 0) {
-            await supabase.from("generator_logs").upsert(updatedGenLogs.map(g => ({
-              id: g.id,
-              date: g.date,
-              generator_name: "Maharaja Generator Set",
-              fuel_added: g.dieselAddedLitres,
-              runtime_hours: g.runHoursAdded,
-              operator_name: g.loggedBy || "Staff"
-            })));
-          }
-
-          if (updatedTasks.length > 0) {
-            await supabase.from("kanban_tasks").upsert(updatedTasks.map(t => ({
-              id: t.id,
-              title: t.title,
-              assignee: t.assignee,
-              due_date: t.date,
-              status: t.status,
-              priority: t.priority
-            })));
-          }
-
-          if (updatedAudits.length > 0) {
-            await supabase.from("audit_logs").upsert(updatedAudits.map(a => ({
-              id: a.id,
-              timestamp: a.timestamp,
-              "user": a.user,
-              action: a.action,
-              ip_address: a.ipAddress,
-              status: a.status
-            })));
-          }
-        } catch (error) {
-          console.error("Bhagyalaxmi ERP: Supabase Cloud Database sync error:", error);
-        }
-      };
-
-      syncCloud();
-    }
   };
 
   const hasPermission = (action: string): boolean => {
@@ -1175,7 +934,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/${portal === "admin" ? "admin" : "client"}`,
+          redirectTo: `${window.location.origin}/auth/callback?next=${portal === "admin" ? "/admin" : "/client"}`,
         },
       });
     } else {
@@ -1317,9 +1076,10 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let updatedCustomers = [...customers];
     const existingCust = customers.find(c => c.name.toLowerCase() === bookingData.customerName.toLowerCase() || c.phone === bookingData.phoneNumber);
     
+    let targetCust: Customer;
     if (!existingCust) {
       const newCustId = `c-${Date.now()}`;
-      const newCustomer: Customer = {
+      targetCust = {
         id: newCustId,
         name: bookingData.customerName.split("'s")[0].split(" & ")[0] || bookingData.customerName,
         photo: bookingData.customerPhoto,
@@ -1333,20 +1093,22 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           { id: `w-${Date.now()}`, sender: "owner", text: `Welcome to Bhagyalaxmi Lawns! Your booking for ${bookingData.bookingType} has been requested.`, timestamp: new Date().toISOString() }
         ]
       };
-      updatedCustomers = [newCustomer, ...customers];
+      updatedCustomers = [targetCust, ...customers];
       setCustomers(updatedCustomers);
     } else {
       updatedCustomers = customers.map(c => {
         if (c.id === existingCust.id) {
-          return {
+          targetCust = {
             ...c,
             bookingCount: c.bookingCount + 1,
             totalSpent: c.totalSpent + bookingData.amount,
           };
+          return targetCust;
         }
         return c;
       });
       setCustomers(updatedCustomers);
+      targetCust = updatedCustomers.find(c => c.id === existingCust.id)!;
     }
 
     const newInvoiceId = `inv-${Date.now()}`;
@@ -1380,6 +1142,59 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(updatedAudits);
 
     saveToStorage(updatedBookings, updatedCustomers, updatedInvoices, expenses, generatorLogs, kanbanTasks, updatedAudits);
+
+    if (isSupabaseConfigured) {
+      supabase.from("bookings").insert({
+        id: newId,
+        customer_name: newBooking.customerName,
+        customer_photo: newBooking.customerPhoto,
+        email: newBooking.email,
+        phone_number: newBooking.phoneNumber,
+        venue_name: newBooking.venueName,
+        booking_date: newBooking.bookingDate,
+        guest_count: newBooking.guestCount,
+        amount: newBooking.amount,
+        advance_paid: 0,
+        status: newBooking.status,
+        progress: newBooking.progress,
+        package_selected: newBooking.packageSelected,
+      }).then(({ error }) => { if (error) console.error("Supabase insert booking error:", error); });
+
+      if (targetCust) {
+        supabase.from("customers").upsert({
+          id: targetCust.id,
+          name: targetCust.name,
+          photo: targetCust.photo,
+          phone: targetCust.phone,
+          email: targetCust.email,
+          address: targetCust.address,
+          total_spent: targetCust.totalSpent,
+          booking_count: targetCust.bookingCount,
+          notes: targetCust.notes,
+          whatsapp_history: targetCust.whatsappHistory,
+        }).then(({ error }) => { if (error) console.error("Supabase upsert customer error:", error); });
+      }
+
+      supabase.from("invoices").insert({
+        id: newInvoiceId,
+        booking_id: newId,
+        client_name: newInvoice.clientName,
+        date: newInvoice.date,
+        amount: newInvoice.totalAmount,
+        status: newInvoice.status,
+        gst_number: ""
+      }).then(({ error }) => { if (error) console.error("Supabase insert invoice error:", error); });
+
+      supabase.from("audit_logs").insert({
+        id: newAudit.id,
+        timestamp: newAudit.timestamp,
+        "user": newAudit.user,
+        action: newAudit.action,
+        ip_address: newAudit.ipAddress,
+        status: newAudit.status,
+      }).then(({ error }) => { if (error) console.error("Supabase insert audit_log error:", error); });
+    }
+
     return newBooking;
   };
 
@@ -1411,6 +1226,26 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(updatedAudits);
 
     saveToStorage(updatedBookings, customers, updatedInvoices, expenses, generatorLogs, kanbanTasks, updatedAudits);
+
+    if (isSupabaseConfigured) {
+      supabase.from("bookings").update({ status }).eq("id", id)
+        .then(({ error }) => { if (error) console.error("Supabase update booking status error:", error); });
+
+      if (booking) {
+        const invStatus = status === "Confirmed" ? "Paid" : status === "Completed" ? "Paid" : "Unpaid";
+        supabase.from("invoices").update({ status: invStatus }).eq("booking_id", id)
+          .then(({ error }) => { if (error) console.error("Supabase update invoice status error:", error); });
+      }
+
+      supabase.from("audit_logs").insert({
+        id: newAudit.id,
+        timestamp: newAudit.timestamp,
+        "user": newAudit.user,
+        action: newAudit.action,
+        ip_address: newAudit.ipAddress,
+        status: newAudit.status,
+      }).then(({ error }) => { if (error) console.error("Supabase insert audit_log error:", error); });
+    }
   };
 
   const updateBookingDate = (id: string, date: string) => {
@@ -1430,6 +1265,20 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(updatedAudits);
 
     saveToStorage(updatedBookings, customers, invoices, expenses, generatorLogs, kanbanTasks, updatedAudits);
+
+    if (isSupabaseConfigured) {
+      supabase.from("bookings").update({ booking_date: date }).eq("id", id)
+        .then(({ error }) => { if (error) console.error("Supabase update booking date error:", error); });
+
+      supabase.from("audit_logs").insert({
+        id: newAudit.id,
+        timestamp: newAudit.timestamp,
+        "user": newAudit.user,
+        action: newAudit.action,
+        ip_address: newAudit.ipAddress,
+        status: newAudit.status,
+      }).then(({ error }) => { if (error) console.error("Supabase insert audit_log error:", error); });
+    }
   };
 
   const addCustomerNote = (customerId: string, noteText: string) => {
@@ -1440,17 +1289,24 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       text: noteText
     };
 
+    let targetCust: Customer | undefined;
     const updatedCustomers = customers.map(c => {
       if (c.id === customerId) {
-        return {
+        targetCust = {
           ...c,
           notes: [newNote, ...c.notes]
         };
+        return targetCust;
       }
       return c;
     });
     setCustomers(updatedCustomers);
     saveToStorage(bookings, updatedCustomers, invoices, expenses, generatorLogs, kanbanTasks, auditLogs);
+
+    if (isSupabaseConfigured && targetCust) {
+      supabase.from("customers").update({ notes: targetCust.notes }).eq("id", customerId)
+        .then(({ error }) => { if (error) console.error("Supabase update customer notes error:", error); });
+    }
   };
 
   const sendWhatsAppMessage = (customerId: string, text: string) => {
@@ -1462,16 +1318,24 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       timestamp: new Date().toISOString()
     };
 
+    let targetCust: Customer | undefined;
     const updatedCustomers = customers.map(c => {
       if (c.id === customerId) {
-        return {
+        targetCust = {
           ...c,
           whatsappHistory: [...c.whatsappHistory, newMsg]
         };
+        return targetCust;
       }
       return c;
     });
     setCustomers(updatedCustomers);
+    saveToStorage(bookings, updatedCustomers, invoices, expenses, generatorLogs, kanbanTasks, auditLogs);
+
+    if (isSupabaseConfigured && targetCust) {
+      supabase.from("customers").update({ whatsapp_history: targetCust.whatsappHistory }).eq("id", customerId)
+        .then(({ error }) => { if (error) console.error("Supabase update whatsapp_history error:", error); });
+    }
 
     setTimeout(() => {
       const responseMsgId = `w-${Date.now() + 1}`;
@@ -1485,10 +1349,15 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCustomers(currentCust => {
         const updated = currentCust.map(c => {
           if (c.id === customerId) {
-            return {
+            const updatedCust = {
               ...c,
               whatsappHistory: [...c.whatsappHistory, responseMsg]
             };
+            if (isSupabaseConfigured) {
+              supabase.from("customers").update({ whatsapp_history: updatedCust.whatsappHistory }).eq("id", customerId)
+                .then(({ error }) => { if (error) console.error("Supabase update whatsapp_history auto-reply error:", error); });
+            }
+            return updatedCust;
           }
           return c;
         });
@@ -1496,8 +1365,6 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return updated;
       });
     }, 1500);
-
-    saveToStorage(bookings, updatedCustomers, invoices, expenses, generatorLogs, kanbanTasks, auditLogs);
   };
 
   const addGeneratorLog = (dieselLitres: number, costPerLitre: number, runHours: number) => {
@@ -1529,8 +1396,9 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setGeneratorLogs(updatedGenLogs);
 
     let updatedExpenses = [...expenses];
+    let newExpense: Expense | null = null;
     if (totalCost > 0) {
-      const newExpense: Expense = {
+      newExpense = {
         id: `exp-${Date.now()}`,
         category: "Generator Diesel",
         amount: totalCost,
@@ -1554,12 +1422,49 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(updatedAudits);
 
     saveToStorage(bookings, customers, invoices, updatedExpenses, updatedGenLogs, kanbanTasks, updatedAudits);
+
+    if (isSupabaseConfigured) {
+      supabase.from("generator_logs").insert({
+        id: logId,
+        date: newLog.date,
+        generator_name: "Maharaja Generator Set",
+        fuel_added: dieselLitres,
+        runtime_hours: runHours,
+        operator_name: newLog.loggedBy,
+        notes: `Refill level: ${newFuelLevel}%, Cost/Litre: ${costPerLitre}`
+      }).then(({ error }) => { if (error) console.error("Supabase insert generator log error:", error); });
+
+      if (newExpense) {
+        supabase.from("expenses").insert({
+          id: newExpense.id,
+          category: newExpense.category,
+          amount: newExpense.amount,
+          date: newExpense.date,
+          description: newExpense.description,
+          logged_by: newExpense.payee
+        }).then(({ error }) => { if (error) console.error("Supabase insert generator expense error:", error); });
+      }
+
+      supabase.from("audit_logs").insert({
+        id: newAudit.id,
+        timestamp: newAudit.timestamp,
+        "user": newAudit.user,
+        action: newAudit.action,
+        ip_address: newAudit.ipAddress,
+        status: newAudit.status,
+      }).then(({ error }) => { if (error) console.error("Supabase insert audit_log error:", error); });
+    }
   };
 
   const updateTaskStatus = (taskId: string, status: TaskStatus) => {
     const updatedTasks = kanbanTasks.map(t => (t.id === taskId ? { ...t, status } : t));
     setKanbanTasks(updatedTasks);
     saveToStorage(bookings, customers, invoices, expenses, generatorLogs, updatedTasks, auditLogs);
+
+    if (isSupabaseConfigured) {
+      supabase.from("kanban_tasks").update({ status }).eq("id", taskId)
+        .then(({ error }) => { if (error) console.error("Supabase update task status error:", error); });
+    }
   };
 
   const addNewTask = (taskData: Omit<KanbanTask, "id" | "date">) => {
@@ -1571,6 +1476,17 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updatedTasks = [newTask, ...kanbanTasks];
     setKanbanTasks(updatedTasks);
     saveToStorage(bookings, customers, invoices, expenses, generatorLogs, updatedTasks, auditLogs);
+
+    if (isSupabaseConfigured) {
+      supabase.from("kanban_tasks").insert({
+        id: newTask.id,
+        title: newTask.title,
+        assignee: newTask.assignee,
+        due_date: newTask.date,
+        status: newTask.status,
+        priority: newTask.priority
+      }).then(({ error }) => { if (error) console.error("Supabase insert task error:", error); });
+    }
   };
 
   const addExpense = (expenseData: Omit<Expense, "id" | "date">) => {
@@ -1582,6 +1498,17 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updatedExpenses = [newExpense, ...expenses];
     setExpenses(updatedExpenses);
     saveToStorage(bookings, customers, invoices, updatedExpenses, generatorLogs, kanbanTasks, auditLogs);
+
+    if (isSupabaseConfigured) {
+      supabase.from("expenses").insert({
+        id: newExpense.id,
+        category: newExpense.category,
+        amount: newExpense.amount,
+        date: newExpense.date,
+        description: newExpense.description || "",
+        logged_by: newExpense.payee || "Staff"
+      }).then(({ error }) => { if (error) console.error("Supabase insert expense error:", error); });
+    }
   };
 
   const addBookingRequest = (reqData: Omit<BookingRequest, "id" | "createdAt" | "status">) => {
@@ -1607,6 +1534,35 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(updatedAudits);
 
     saveToStorage(bookings, customers, invoices, expenses, generatorLogs, kanbanTasks, updatedAudits, updatedRequests);
+
+    if (isSupabaseConfigured) {
+      supabase.from("booking_requests").insert({
+        id: newId,
+        customer_name: newRequest.customerName,
+        phone_number: newRequest.phoneNumber,
+        email: newRequest.email,
+        venue: newRequest.venue,
+        event_type: newRequest.eventType,
+        event_date: newRequest.eventDate,
+        event_session: newRequest.eventSession,
+        guests: newRequest.guests,
+        package_selected: newRequest.packageSelected,
+        vendors: newRequest.vendors,
+        additional_services: newRequest.additionalServices,
+        pricing_breakdown: newRequest.pricingBreakdown,
+        status: newRequest.status
+      }).then(({ error }) => { if (error) console.error("Supabase insert booking_request error:", error); });
+
+      supabase.from("audit_logs").insert({
+        id: newAudit.id,
+        timestamp: newAudit.timestamp,
+        "user": newAudit.user,
+        action: newAudit.action,
+        ip_address: newAudit.ipAddress,
+        status: newAudit.status,
+      }).then(({ error }) => { if (error) console.error("Supabase insert audit_log error:", error); });
+    }
+
     return newRequest;
   };
 
@@ -1627,6 +1583,20 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(updatedAudits);
 
     saveToStorage(bookings, customers, invoices, expenses, generatorLogs, kanbanTasks, updatedAudits, updatedRequests);
+
+    if (isSupabaseConfigured) {
+      supabase.from("booking_requests").update({ status }).eq("id", id)
+        .then(({ error }) => { if (error) console.error("Supabase update request status error:", error); });
+
+      supabase.from("audit_logs").insert({
+        id: newAudit.id,
+        timestamp: newAudit.timestamp,
+        "user": newAudit.user,
+        action: newAudit.action,
+        ip_address: newAudit.ipAddress,
+        status: newAudit.status,
+      }).then(({ error }) => { if (error) console.error("Supabase insert audit_log error:", error); });
+    }
   };
 
   const updateBookingRequest = (id: string, requestDetails: Partial<BookingRequest>) => {
@@ -1646,6 +1616,20 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(updatedAudits);
 
     saveToStorage(bookings, customers, invoices, expenses, generatorLogs, kanbanTasks, updatedAudits, updatedRequests);
+
+    if (isSupabaseConfigured) {
+      supabase.from("booking_requests").update(requestDetails).eq("id", id)
+        .then(({ error }) => { if (error) console.error("Supabase update request details error:", error); });
+
+      supabase.from("audit_logs").insert({
+        id: newAudit.id,
+        timestamp: newAudit.timestamp,
+        "user": newAudit.user,
+        action: newAudit.action,
+        ip_address: newAudit.ipAddress,
+        status: newAudit.status,
+      }).then(({ error }) => { if (error) console.error("Supabase insert audit_log error:", error); });
+    }
   };
 
   const convertRequestToBooking = (id: string) => {
@@ -1654,7 +1638,6 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const bookingAmt = req.pricingBreakdown.grandTotal;
     
-    // Add booking directly
     const newId = `b-${Date.now()}`;
     const newBooking: Booking = {
       id: newId,
@@ -1675,11 +1658,9 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updatedBookings = [newBooking, ...bookings];
     setBookings(updatedBookings);
 
-    // Update Request status to approved/converted
     const updatedRequests = bookingRequests.map(r => r.id === id ? { ...r, status: "Approved" as const } : r);
     setBookingRequests(updatedRequests);
 
-    // Create invoice
     const newInvoiceId = `inv-${Date.now()}`;
     const taxableVal = Math.round(bookingAmt / 1.18);
     const taxAmt = Math.round(taxableVal * 0.09);
@@ -1699,12 +1680,12 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updatedInvoices = [newInvoice, ...invoices];
     setInvoices(updatedInvoices);
 
-    // Add customer logic
     let updatedCustomers = [...customers];
     const existingCust = customers.find(c => c.name.toLowerCase() === req.customerName.toLowerCase() || c.phone === req.phoneNumber);
+    let targetCust: Customer;
     if (!existingCust) {
       const newCustId = `c-${Date.now()}`;
-      const newCustomer: Customer = {
+      targetCust = {
         id: newCustId,
         name: req.customerName.split("'s")[0].split(" & ")[0] || req.customerName,
         photo: "https://images.unsplash.com/photo-1621574539437-4b7cb63120b8?auto=format&fit=crop&q=80&w=200",
@@ -1718,23 +1699,24 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           { id: `w-${Date.now()}`, sender: "owner", text: `Your booking request has been converted to a confirmed booking!`, timestamp: new Date().toISOString() }
         ]
       };
-      updatedCustomers = [newCustomer, ...customers];
+      updatedCustomers = [targetCust, ...customers];
       setCustomers(updatedCustomers);
     } else {
       updatedCustomers = customers.map(c => {
         if (c.id === existingCust.id) {
-          return {
+          targetCust = {
             ...c,
             bookingCount: c.bookingCount + 1,
             totalSpent: c.totalSpent + bookingAmt,
           };
+          return targetCust;
         }
         return c;
       });
       setCustomers(updatedCustomers);
+      targetCust = updatedCustomers.find(c => c.id === existingCust.id)!;
     }
 
-    // Add tasks
     const newTasks = [
       {
         id: `t-${Date.now()}`,
@@ -1772,6 +1754,70 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(updatedAudits);
 
     saveToStorage(updatedBookings, updatedCustomers, updatedInvoices, expenses, generatorLogs, updatedTasks, updatedAudits, updatedRequests);
+
+    if (isSupabaseConfigured) {
+      supabase.from("bookings").insert({
+        id: newId,
+        customer_name: newBooking.customerName,
+        customer_photo: newBooking.customerPhoto,
+        email: newBooking.email,
+        phone_number: newBooking.phoneNumber,
+        venue_name: newBooking.venueName,
+        booking_date: newBooking.bookingDate,
+        guest_count: newBooking.guestCount,
+        amount: newBooking.amount,
+        advance_paid: 0,
+        status: newBooking.status,
+        progress: newBooking.progress,
+        package_selected: newBooking.packageSelected,
+      }).then(({ error }) => { if (error) console.error("Supabase insert booking (convert) error:", error); });
+
+      supabase.from("booking_requests").update({ status: "Approved" }).eq("id", id)
+        .then(({ error }) => { if (error) console.error("Supabase update request status (convert) error:", error); });
+
+      supabase.from("invoices").insert({
+        id: newInvoiceId,
+        booking_id: newId,
+        client_name: newInvoice.clientName,
+        date: newInvoice.date,
+        amount: newInvoice.totalAmount,
+        status: newInvoice.status,
+        gst_number: ""
+      }).then(({ error }) => { if (error) console.error("Supabase insert invoice (convert) error:", error); });
+
+      if (targetCust) {
+        supabase.from("customers").upsert({
+          id: targetCust.id,
+          name: targetCust.name,
+          photo: targetCust.photo,
+          phone: targetCust.phone,
+          email: targetCust.email,
+          address: targetCust.address,
+          total_spent: targetCust.totalSpent,
+          booking_count: targetCust.bookingCount,
+          notes: targetCust.notes,
+          whatsapp_history: targetCust.whatsappHistory,
+        }).then(({ error }) => { if (error) console.error("Supabase upsert customer (convert) error:", error); });
+      }
+
+      supabase.from("kanban_tasks").insert(newTasks.map(t => ({
+        id: t.id,
+        title: t.title,
+        assignee: t.assignee,
+        due_date: t.date,
+        status: t.status,
+        priority: t.priority
+      }))).then(({ error }) => { if (error) console.error("Supabase insert tasks (convert) error:", error); });
+
+      supabase.from("audit_logs").insert({
+        id: newAudit.id,
+        timestamp: newAudit.timestamp,
+        "user": newAudit.user,
+        action: newAudit.action,
+        ip_address: newAudit.ipAddress,
+        status: newAudit.status,
+      }).then(({ error }) => { if (error) console.error("Supabase insert audit_log (convert) error:", error); });
+    }
   };
 
   const addVendor = (vendorData: Omit<Vendor, "id">) => {
@@ -1795,6 +1841,38 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(updatedAudits);
 
     saveToStorage(bookings, customers, invoices, expenses, generatorLogs, kanbanTasks, updatedAudits, bookingRequests, updatedVendors);
+
+    if (isSupabaseConfigured) {
+      supabase.from("vendors").insert({
+        id: newId,
+        name: newVendor.name,
+        category: newVendor.category,
+        logo: newVendor.logo,
+        cover_image: newVendor.coverImage,
+        price: newVendor.price,
+        location: newVendor.location,
+        phone: newVendor.phone,
+        email: newVendor.email,
+        instagram: newVendor.instagram,
+        whatsapp: newVendor.whatsapp,
+        commission_percentage: newVendor.commissionPercentage,
+        rating: newVendor.rating,
+        completed_weddings: newVendor.completedWeddings,
+        featured: newVendor.featured,
+        gallery: newVendor.gallery,
+        menu_items: newVendor.menuItems,
+        photography_portfolio: newVendor.photographyPortfolio
+      }).then(({ error }) => { if (error) console.error("Supabase insert vendor error:", error); });
+
+      supabase.from("audit_logs").insert({
+        id: newAudit.id,
+        timestamp: newAudit.timestamp,
+        "user": newAudit.user,
+        action: newAudit.action,
+        ip_address: newAudit.ipAddress,
+        status: newAudit.status,
+      }).then(({ error }) => { if (error) console.error("Supabase insert audit_log error:", error); });
+    }
   };
 
   const updateVendor = (id: string, vendorDetails: Partial<Vendor>) => {
@@ -1814,6 +1892,37 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(updatedAudits);
 
     saveToStorage(bookings, customers, invoices, expenses, generatorLogs, kanbanTasks, updatedAudits, bookingRequests, updatedVendors);
+
+    if (isSupabaseConfigured) {
+      supabase.from("vendors").update({
+        name: vendorDetails.name,
+        category: vendorDetails.category,
+        logo: vendorDetails.logo,
+        cover_image: vendorDetails.coverImage,
+        price: vendorDetails.price,
+        location: vendorDetails.location,
+        phone: vendorDetails.phone,
+        email: vendorDetails.email,
+        instagram: vendorDetails.instagram,
+        whatsapp: vendorDetails.whatsapp,
+        commission_percentage: vendorDetails.commissionPercentage,
+        rating: vendorDetails.rating,
+        completed_weddings: vendorDetails.completedWeddings,
+        featured: vendorDetails.featured,
+        gallery: vendorDetails.gallery,
+        menu_items: vendorDetails.menuItems,
+        photography_portfolio: vendorDetails.photographyPortfolio
+      }).eq("id", id).then(({ error }) => { if (error) console.error("Supabase update vendor error:", error); });
+
+      supabase.from("audit_logs").insert({
+        id: newAudit.id,
+        timestamp: newAudit.timestamp,
+        "user": newAudit.user,
+        action: newAudit.action,
+        ip_address: newAudit.ipAddress,
+        status: newAudit.status,
+      }).then(({ error }) => { if (error) console.error("Supabase insert audit_log error:", error); });
+    }
   };
 
   const updateConfigSettings = (newConfig: Partial<ERPConfig>) => {
@@ -1835,6 +1944,68 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogs(updatedAudits);
 
     saveToStorage(bookings, customers, invoices, expenses, generatorLogs, kanbanTasks, updatedAudits, bookingRequests, vendors, updatedConfig);
+
+    if (isSupabaseConfigured) {
+      supabase.from("erp_config").upsert({
+        id: "default",
+        hall_price: updatedConfig.hallPrice,
+        hall_lawn_price: updatedConfig.hallLawnPrice,
+        generator_cost_per_hour: updatedConfig.generatorCostPerHour,
+        electricity_cost_per_unit: updatedConfig.electricityCostPerUnit,
+        gst_percentage: updatedConfig.gstPercentage,
+        discount_default: updatedConfig.discountDefault,
+        invoice_template: updatedConfig.invoiceTemplate,
+        vendor_categories: updatedConfig.vendorCategories,
+        package_templates: updatedConfig.packageTemplates
+      }).then(({ error }) => { if (error) console.error("Supabase upsert erp_config error:", error); });
+
+      supabase.from("audit_logs").insert({
+        id: newAudit.id,
+        timestamp: newAudit.timestamp,
+        "user": newAudit.user,
+        action: newAudit.action,
+        ip_address: newAudit.ipAddress,
+        status: newAudit.status,
+      }).then(({ error }) => { if (error) console.error("Supabase insert audit_log error:", error); });
+    }
+  };
+
+  const clearAllDatabaseData = async () => {
+    setBookings([]);
+    setCustomers([]);
+    setInvoices([]);
+    setExpenses([]);
+    setGeneratorLogs([]);
+    setKanbanTasks([]);
+    setAuditLogs([]);
+    setBookingRequests([]);
+
+    localStorage.removeItem("bl_bookings");
+    localStorage.removeItem("bl_customers");
+    localStorage.removeItem("bl_invoices");
+    localStorage.removeItem("bl_expenses");
+    localStorage.removeItem("bl_genLogs");
+    localStorage.removeItem("bl_tasks");
+    localStorage.removeItem("bl_audits");
+    localStorage.removeItem("bl_booking_requests");
+
+    if (isSupabaseConfigured) {
+      try {
+        await Promise.all([
+          supabase.from("bookings").delete().neq("id", ""),
+          supabase.from("booking_requests").delete().neq("id", ""),
+          supabase.from("customers").delete().neq("id", ""),
+          supabase.from("invoices").delete().neq("id", ""),
+          supabase.from("expenses").delete().neq("id", ""),
+          supabase.from("generator_logs").delete().neq("id", ""),
+          supabase.from("kanban_tasks").delete().neq("id", ""),
+          supabase.from("audit_logs").delete().neq("id", ""),
+        ]);
+        console.log("Bhagyalaxmi ERP: Supabase tables cleared of client and booking data.");
+      } catch (err) {
+        console.error("Bhagyalaxmi ERP: Error clearing Supabase tables:", err);
+      }
+    }
   };
 
   const syncDatabase = () => {
@@ -1916,6 +2087,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addVendor,
         updateVendor,
         updateConfigSettings,
+        clearAllDatabaseData,
       }}
     >
       {children}

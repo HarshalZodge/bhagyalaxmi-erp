@@ -36,7 +36,34 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Refresh auth session
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    const authRoleCookie = request.cookies.get("bl_auth_role")?.value;
+    const userEmailCookie = request.cookies.get("bl_auth_email")?.value;
+
+    if (!authRoleCookie || !userEmailCookie) {
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+
+        const role = profile?.role || "Client";
+
+        // Set cookies on response so the browser receives them
+        supabaseResponse.cookies.set("bl_auth_email", user.email!, { path: "/", maxAge: 86400, sameSite: "lax" });
+        supabaseResponse.cookies.set("bl_auth_role", role, { path: "/", maxAge: 86400, sameSite: "lax" });
+
+        // Mutate request cookies so route guards in current middleware run see them
+        request.cookies.set("bl_auth_email", user.email!);
+        request.cookies.set("bl_auth_role", role);
+      } catch (err) {
+        console.error("Error fetching user profile in middleware:", err);
+      }
+    }
+  }
 
   return supabaseResponse;
 }
