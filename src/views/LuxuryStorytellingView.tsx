@@ -835,8 +835,10 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </GlassButton>
         </div>
 
-        <div className="absolute bottom-6 z-20 text-[8px] font-bold text-white/35 uppercase tracking-widest">
-          © 2026 Bhagyalaxmi Lawns & Banquet Hall. All rights reserved.
+        <div className="absolute bottom-6 z-20 text-[8px] font-bold text-white/35 uppercase tracking-widest flex items-center gap-4">
+          <span>© 2026 Bhagyalaxmi Lawns. All rights reserved.</span>
+          <span>•</span>
+          <a href="/login-admin" className="hover:text-amber-400 transition-all font-black text-amber-300">Staff Portal</a>
         </div>
       </section>
 

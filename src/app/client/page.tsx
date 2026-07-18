@@ -32,17 +32,20 @@ export default function ClientDashboard() {
     authLoading,
     bookingRequests,
     convertRequestToBooking,
+    logout,
   } = useERP();
 
-  // Find request associated with this client email
+  // Find request associated with this client email (EXACT match)
   const clientRequest = bookingRequests.find(
     (r) => r.email.toLowerCase() === (user?.email || "").toLowerCase()
-  ) || bookingRequests[0];
+  );
 
-  // Find booking associated with this client email
+  // Find booking associated with this client email (EXACT match)
   const clientBooking = bookings.find(
     (b) => b.email.toLowerCase() === (user?.email || "").toLowerCase()
-  ) || (bookingRequests.length === 0 ? bookings[0] : undefined);
+  );
+
+  const hasNoBookingsOrRequests = !clientBooking && !clientRequest;
 
   // Find invoices associated with this client email
   const clientInvoices = invoices.filter(
@@ -99,6 +102,33 @@ export default function ClientDashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f9f6f0]">
         <div className="w-10 h-10 border-4 border-purple-royal/20 border-t-gold-luxury rounded-full animate-spin shadow-sm" />
+      </div>
+    );
+  }
+
+  if (hasNoBookingsOrRequests) {
+    return (
+      <div className="relative min-h-screen z-10 w-full bg-[#f9f6f0] p-6 md:p-12 overflow-y-auto">
+        <div className="max-w-5xl mx-auto flex justify-between items-center mb-8 bg-white/20 backdrop-blur-md p-4 rounded-2xl border border-white/60 shadow-sm animate-fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl overflow-hidden border border-purple-royal/10 bg-white">
+              <img src="/logo.jpg" alt="Bhagyalaxmi Logo" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <span className="text-sm font-extrabold text-purple-royal tracking-widest uppercase">Bhagyalaxmi</span>
+              <p className="text-[8px] font-black text-gold-luxury tracking-wider uppercase leading-none">Lawns & Banquet Hall</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="hidden sm:inline text-xs text-charcoal-dark/60 font-semibold">{user?.email}</span>
+            <GlassButton onClick={logout} className="px-4 py-2 text-xs font-bold uppercase tracking-wider bg-white/10 hover:bg-white/30 border-white/40">
+              Sign Out
+            </GlassButton>
+          </div>
+        </div>
+        <div className="max-w-5xl mx-auto">
+          <BookingPageView />
+        </div>
       </div>
     );
   }
