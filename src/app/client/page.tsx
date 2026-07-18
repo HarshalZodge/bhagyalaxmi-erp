@@ -125,6 +125,14 @@ export default function ClientDashboard() {
             </span>
           </div>
 
+          {/* Temporary Debug Info */}
+          <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs space-y-1">
+            <p className="font-bold text-amber-800">Debug Info:</p>
+            <p>Email: <strong className="font-bold">{user?.email}</strong></p>
+            <p>Role: <strong className="font-bold">{user?.role}</strong></p>
+            <p>Supabase URL: <strong className="font-bold">{process.env.NEXT_PUBLIC_SUPABASE_URL}</strong></p>
+          </div>
+
           {/* VIEW: DASHBOARD */}
           {activeView === "dashboard" && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
