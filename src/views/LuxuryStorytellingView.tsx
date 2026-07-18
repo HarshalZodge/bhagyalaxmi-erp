@@ -84,22 +84,22 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
 
   const testimonials = [
     {
-      quote: "Our wedding was a fairytale. The transition from the massive Royal Lawn to the grand air-conditioned banquet hall felt seamless. The Maharaja Grand Hall is simply unmatched in Ahilyanagar.",
-      author: "Snehal & Rahul Deshmukh",
-      date: "December 2025",
-      type: "Royal Package Wedding",
+      quote: "One of the best and largest lawns in Ahilyanagar. The banquet hall has high ceilings, massive chandeliers, and perfect air conditioning. Extremely spacious parking area that can easily fit hundreds of cars. Perfect for large Maharashtrian weddings!",
+      author: "Pratik Shelar (Local Guide)",
+      date: "4 months ago",
+      type: "Google Maps Review",
     },
     {
-      quote: "The generator back-up, the luxurious bridal suites, and their on-site operations team handled our 2,500 guests with absolute professionalism. Highly recommend the Hall + Lawn package.",
-      author: "Aditi & Vikram Patil",
-      date: "January 2026",
-      type: "Luxury Package Reception",
+      quote: "Attended a relative's wedding here. The entry path lighting and the floral stage decorations were breathtaking. The location is very convenient near Bhingar Cantonment, and the overall management handled the 2,500+ guests very professionally.",
+      author: "Sandip Kadam",
+      date: "2 months ago",
+      type: "Google Maps Review",
     },
     {
-      quote: "Bhagyalaxmi Lawns made our family event stress-free. From catering menus featuring Puran Poli to custom decoration themes, everything was top-notch.",
-      author: "Meera & Sanjay Shinde",
-      date: "March 2026",
-      type: "Gold Package Engagement",
+      quote: "Very spacious lawn and luxurious master suites for the bride and groom. Clean washrooms, well-ventilated dinner area, and robust power generator backup systems. Highly recommended for premium family events.",
+      author: "Rohan Mutha",
+      date: "5 months ago",
+      type: "Google Maps Review",
     },
   ];
 
@@ -616,7 +616,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
             <img
               src="/assets/images/03_stage_purple_theme.jpg"
@@ -655,6 +655,76 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
               <div className="text-white space-y-1">
                 <h4 className="font-bold text-sm uppercase">Grand Welcoming Entrance</h4>
                 <p className="text-[10px] text-white/80">Shimmering fairy light tunnels and warm spotlights</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
+            <img
+              src="/assets/images/gallery_1.jpg"
+              alt="Lawn reception lights"
+              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
+              <div className="text-white space-y-1">
+                <h4 className="font-bold text-sm uppercase">Fairy Light Gateway</h4>
+                <p className="text-[10px] text-white/80">Spectacular pathway entries</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
+            <img
+              src="/assets/images/gallery_2.jpg"
+              alt="Grand Hall Stage Setting"
+              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
+              <div className="text-white space-y-1">
+                <h4 className="font-bold text-sm uppercase">Decorated Hall Stage</h4>
+                <p className="text-[10px] text-white/80">Bespoke lighting and warm highlights</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
+            <img
+              src="/assets/images/gallery_3.jpg"
+              alt="Evening event gathering"
+              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
+              <div className="text-white space-y-1">
+                <h4 className="font-bold text-sm uppercase">Lawn Evening Reception</h4>
+                <p className="text-[10px] text-white/80">Vast outdoor banquet under dynamic lights</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
+            <img
+              src="/assets/images/gallery_4.jpg"
+              alt="Bridal room master suite"
+              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
+              <div className="text-white space-y-1">
+                <h4 className="font-bold text-sm uppercase">Lawn Entrance Facade</h4>
+                <p className="text-[10px] text-white/80">Opulent structures for welcoming guests</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
+            <img
+              src="/assets/images/gallery_5.jpg"
+              alt="Mandap details"
+              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
+              <div className="text-white space-y-1">
+                <h4 className="font-bold text-sm uppercase">Indoor Royal Mandap</h4>
+                <p className="text-[10px] text-white/80">Traditional marigold styling and setups</p>
               </div>
             </div>
           </div>
@@ -717,6 +787,18 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
                 }`}
               />
             ))}
+          </div>
+
+          {/* Google Review link button */}
+          <div className="pt-6">
+            <a
+              href="https://maps.app.goo.gl/5TbN8BpgEtYS3kGJ8"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-300 hover:text-white transition-all bg-white/10 px-6 py-3 rounded-full border border-white/15 shadow-sm hover:bg-white/20"
+            >
+              <span>View All Google Reviews ↗</span>
+            </a>
           </div>
         </div>
       </section>
