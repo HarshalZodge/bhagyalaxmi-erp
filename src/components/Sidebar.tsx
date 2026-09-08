@@ -30,7 +30,7 @@ export const Sidebar: React.FC = () => {
     { id: "booking-requests", name: "Booking Requests", icon: Inbox, permission: "view:booking-requests" },
     { id: "bookings", name: "Bookings", icon: ClipboardList, permission: "view:bookings" },
     { id: "calendar", name: "Calendar", icon: CalendarDays, permission: "view:calendar" },
-    { id: "booking-page", name: "New Booking", icon: UserPlus, permission: "view:new-booking" },
+    { id: "manual-booking", name: "Manual Booking", icon: UserPlus, permission: "view:new-booking" },
     { id: "vendor-management", name: "Vendor Partners", icon: Store, permission: "view:vendor-management" },
     { id: "customers", name: "CRM / Customers", icon: Users, permission: "view:crm" },
     { id: "finance", name: "Finance & GST", icon: IndianRupee, permission: "view:finance" },

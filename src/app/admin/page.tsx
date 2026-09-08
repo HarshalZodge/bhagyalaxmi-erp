@@ -7,7 +7,7 @@ import Topbar from "@/components/Topbar";
 import DashboardView from "@/views/DashboardView";
 import BookingsView from "@/views/BookingsView";
 import CalendarView from "@/views/CalendarView";
-import BookingPageView from "@/views/BookingPageView";
+import ManualBookingView from "@/views/ManualBookingView";
 import CustomersView from "@/views/CustomersView";
 import FinanceView from "@/views/FinanceView";
 import OperationsView from "@/views/OperationsView";
@@ -26,7 +26,7 @@ export default function AdminDashboard() {
     dashboard: "view:dashboard",
     bookings: "view:bookings",
     calendar: "view:calendar",
-    "booking-page": "view:new-booking",
+    "manual-booking": "view:new-booking",
     "booking-requests": "view:booking-requests",
     "vendor-management": "view:vendor-management",
     customers: "view:crm",
@@ -90,8 +90,8 @@ export default function AdminDashboard() {
         return <BookingsView />;
       case "calendar":
         return <CalendarView />;
-      case "booking-page":
-        return <BookingPageView />;
+      case "manual-booking":
+        return <ManualBookingView />;
       case "booking-requests":
         return <BookingRequestsView />;
       case "vendor-management":

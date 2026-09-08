@@ -3,8 +3,20 @@ import type { NextRequest } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
-  // Update Supabase session cookies and fetch resolved session/role/email
-  const { response, role, email } = await updateSession(request);
+  let updateResult;
+  try {
+    // Update Supabase session cookies with strict timeout protection
+    updateResult = await updateSession(request);
+  } catch (err) {
+    console.warn("Middleware session update error:", err);
+    updateResult = {
+      response: NextResponse.next({ request }),
+      role: null,
+      email: null,
+    };
+  }
+
+  const { response, role, email } = updateResult;
   const path = request.nextUrl.pathname;
 
   // Retrieve role and auth cookies (used for both Supabase session syncing and local Sandbox fallbacks)
@@ -19,7 +31,7 @@ export async function middleware(request: NextRequest) {
 
   // Helper to ensure any redirect response preserves updated session and role cookies
   const withCookies = (redirectRes: NextResponse) => {
-    response.cookies.getAll().forEach(cookie => {
+    response.cookies.getAll().forEach((cookie) => {
       redirectRes.cookies.set(cookie.name, cookie.value, cookie);
     });
     return redirectRes;

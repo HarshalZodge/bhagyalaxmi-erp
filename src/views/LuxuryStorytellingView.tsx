@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import {
   MapPin,
@@ -23,11 +24,62 @@ import {
   ShieldCheck,
   Star,
   CheckCircle,
+  Menu,
+  X,
 } from "lucide-react";
 import { useERP } from "@/context/ERPContext";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { GlassInput } from "@/components/ui/GlassInput";
+
+interface LazyVideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
+  src: string;
+}
+
+const LazyVideo = React.forwardRef<HTMLVideoElement, LazyVideoProps>(
+  ({ src, poster, className = "", ...props }, ref) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [isInView, setIsInView] = useState(false);
+
+    useEffect(() => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setIsInView(true);
+            observer.disconnect();
+          }
+        },
+        { rootMargin: "200px" }
+      );
+
+      if (containerRef.current) {
+        observer.observe(containerRef.current);
+      }
+
+      return () => {
+        observer.disconnect();
+      };
+    }, []);
+
+    return (
+      <div ref={containerRef} className={`w-full h-full ${className}`}>
+        {isInView ? (
+          <video
+            ref={ref}
+            src={src}
+            poster={poster}
+            className="w-full h-full object-cover"
+            {...props}
+          />
+        ) : (
+          poster && <img src={poster} alt="Preview" className="w-full h-full object-cover" />
+        )}
+      </div>
+    );
+  }
+);
+
+LazyVideo.displayName = "LazyVideo";
 
 interface LuxuryStorytellingViewProps {
   onStartBooking: () => void;
@@ -73,14 +125,61 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
     }
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (sliderRef.current && e.touches[0]) {
-      const rect = sliderRef.current.getBoundingClientRect();
-      const x = e.touches[0].clientX - rect.left;
-      const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      setSliderPos(percentage);
-    }
-  };
+  // Touch listener with passive check fallback in useEffect below to prevent vertical scroll jitters
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    const handleTouch = (e: TouchEvent) => {
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+      if (e.touches[0]) {
+        const rect = slider.getBoundingClientRect();
+        const x = e.touches[0].clientX - rect.left;
+        const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        setSliderPos(percentage);
+      }
+    };
+
+    slider.addEventListener("touchmove", handleTouch, { passive: false });
+    return () => {
+      slider.removeEventListener("touchmove", handleTouch);
+    };
+  }, []);
+
+  // Sticky nav header state
+  const [isScrolled, setIsScrolled] = useState(false);
+  // Scroll-spy active section state
+  const [activeSection, setActiveSection] = useState("");
+  // Mobile navigation drawer open state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+
+      // Scroll Spy Logic
+      const sections = ["entrance", "hall", "lawn", "stage", "event", "transformation", "overview", "gallery", "contact"];
+      const scrollPos = window.scrollY + 200; // offset for nav bar height
+      
+      for (const sectionId of sections) {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(sectionId);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const testimonials = [
     {
@@ -160,7 +259,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
   };
 
   return (
-    <div ref={containerRef} className="relative w-full bg-[#FAF7F2] text-[#2C2520] overflow-hidden select-none">
+    <div ref={containerRef} className="relative w-full bg-[#FAF7F2] text-[#2C2520] overflow-hidden select-none overflow-x-hidden">
       
       {/* ==========================================
           SECTION 1: HERO VIDEO & GLASS NAVIGATION
@@ -174,6 +273,8 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
             loop
             muted
             playsInline
+            preload="auto"
+            poster="/assets/images/06_main_entrance.jpg"
             className="w-full h-full object-cover scale-105"
           >
             <source src="/assets/videos/01_hero_drone.mp4" type="video/mp4" />
@@ -181,11 +282,15 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           <div className="absolute inset-0 bg-gradient-to-b from-[#1C1613]/55 via-transparent to-[#1C1613]/70 z-10" />
         </div>
 
-        {/* Floating Glassmorphism Navigation */}
-        <header className="relative z-20 w-full px-6 py-4 md:px-12 flex justify-between items-center bg-white/5 backdrop-blur-md border-b border-white/10 shadow-sm">
+        {/* Sticky/Fixed Navigation Header */}
+        <header className={`fixed top-0 left-0 right-0 z-50 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-300 ${
+          isScrolled 
+            ? "bg-[#1C1613]/90 backdrop-blur-md border-b border-white/10 shadow-lg" 
+            : "bg-black/20 backdrop-blur-sm border-b border-white/5"
+        }`}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/20 bg-white">
-              <img src="/logo.jpg" alt="Bhagyalaxmi Logo" className="w-full h-full object-cover" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/20 bg-white relative">
+              <Image src="/logo.jpg" alt="Bhagyalaxmi Logo" fill sizes="40px" className="object-cover" />
             </div>
             <div>
               <span className="text-sm font-extrabold text-white tracking-widest uppercase">Bhagyalaxmi</span>
@@ -194,23 +299,99 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </div>
 
           <nav className="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-widest text-white/80">
-            <a href="#entrance" className="hover:text-white transition-all">Entrance</a>
-            <a href="#hall" className="hover:text-white transition-all">Hall</a>
-            <a href="#lawn" className="hover:text-white transition-all">Lawn</a>
-            <a href="#stage" className="hover:text-white transition-all">Stage</a>
-            <a href="#event" className="hover:text-white transition-all">Event</a>
-            <a href="#transformation" className="hover:text-white transition-all">Before/After</a>
-            <a href="#overview" className="hover:text-white transition-all">Overview</a>
-            <a href="#gallery" className="hover:text-white transition-all">Gallery</a>
+            <a href="#entrance" className={`hover:text-white transition-all py-1 border-b-2 ${activeSection === "entrance" ? "text-amber-400 border-amber-400 font-extrabold" : "text-white/80 border-transparent"}`}>Entrance</a>
+            <a href="#hall" className={`hover:text-white transition-all py-1 border-b-2 ${activeSection === "hall" ? "text-amber-400 border-amber-400 font-extrabold" : "text-white/80 border-transparent"}`}>Hall</a>
+            <a href="#lawn" className={`hover:text-white transition-all py-1 border-b-2 ${activeSection === "lawn" ? "text-amber-400 border-amber-400 font-extrabold" : "text-white/80 border-transparent"}`}>Lawn</a>
+            <a href="#stage" className={`hover:text-white transition-all py-1 border-b-2 ${activeSection === "stage" ? "text-amber-400 border-amber-400 font-extrabold" : "text-white/80 border-transparent"}`}>Stage</a>
+            <a href="#event" className={`hover:text-white transition-all py-1 border-b-2 ${activeSection === "event" ? "text-amber-400 border-amber-400 font-extrabold" : "text-white/80 border-transparent"}`}>Event</a>
+            <a href="#transformation" className={`hover:text-white transition-all py-1 border-b-2 ${activeSection === "transformation" ? "text-amber-400 border-amber-400 font-extrabold" : "text-white/80 border-transparent"}`}>Before/After</a>
+            <a href="#overview" className={`hover:text-white transition-all py-1 border-b-2 ${activeSection === "overview" ? "text-amber-400 border-amber-400 font-extrabold" : "text-white/80 border-transparent"}`}>Overview</a>
+            <a href="#gallery" className={`hover:text-white transition-all py-1 border-b-2 ${activeSection === "gallery" ? "text-amber-400 border-amber-400 font-extrabold" : "text-white/80 border-transparent"}`}>Gallery</a>
           </nav>
 
-          <GlassButton
-            onClick={onStartBooking}
-            className="px-6 py-2 border-white/20 text-xs font-bold uppercase tracking-wider bg-white/10 text-white hover:bg-white/20"
-          >
-            Book Now
-          </GlassButton>
+          {/* Desktop CTA */}
+          <div className="hidden md:block">
+            <GlassButton
+              onClick={onStartBooking}
+              className="px-6 py-3 border-amber-400/25 text-xs font-extrabold uppercase tracking-widest bg-amber-400 text-[#1C1613] hover:bg-amber-300 shadow-md shadow-amber-400/10 min-h-[44px]"
+            >
+              Book Your Event
+            </GlassButton>
+          </div>
+
+          {/* Mobile hamburger menu button */}
+          <div className="flex md:hidden items-center gap-3">
+            <GlassButton
+              onClick={onStartBooking}
+              className="px-4 py-2 border-amber-400/20 text-[10px] font-extrabold uppercase tracking-wider bg-amber-400 text-[#1C1613] hover:bg-amber-300 min-h-[44px]"
+            >
+              Book Your Event
+            </GlassButton>
+            
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="w-11 h-11 flex items-center justify-center rounded-xl bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all focus:outline-none min-h-[44px] min-w-[44px]"
+              aria-label="Toggle Menu"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </header>
+
+        {/* Mobile Navigation Drawer */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ type: "tween", duration: 0.3 }}
+              className="fixed inset-y-0 right-0 w-full max-w-sm z-50 bg-[#1C1613]/95 backdrop-blur-lg border-l border-white/10 p-8 flex flex-col justify-between shadow-2xl"
+            >
+              <div className="space-y-8 pt-16">
+                <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                  <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/20 bg-white relative">
+                    <Image src="/logo.jpg" alt="Bhagyalaxmi Logo" fill sizes="40px" className="object-cover" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-extrabold text-white tracking-widest uppercase">Bhagyalaxmi</span>
+                    <p className="text-[8px] font-black text-amber-400 tracking-wider uppercase leading-none">Lawns & Banquet Hall</p>
+                  </div>
+                </div>
+
+                <nav className="flex flex-col gap-6 text-sm font-bold uppercase tracking-widest text-white/80">
+                  <a href="#entrance" onClick={() => setMobileMenuOpen(false)} className={`py-2 transition-all ${activeSection === "entrance" ? "text-amber-400 font-extrabold" : "text-white/80"}`}>Entrance</a>
+                  <a href="#hall" onClick={() => setMobileMenuOpen(false)} className={`py-2 transition-all ${activeSection === "hall" ? "text-amber-400 font-extrabold" : "text-white/80"}`}>Hall</a>
+                  <a href="#lawn" onClick={() => setMobileMenuOpen(false)} className={`py-2 transition-all ${activeSection === "lawn" ? "text-amber-400 font-extrabold" : "text-white/80"}`}>Lawn</a>
+                  <a href="#stage" onClick={() => setMobileMenuOpen(false)} className={`py-2 transition-all ${activeSection === "stage" ? "text-amber-400 font-extrabold" : "text-white/80"}`}>Stage</a>
+                  <a href="#event" onClick={() => setMobileMenuOpen(false)} className={`py-2 transition-all ${activeSection === "event" ? "text-amber-400 font-extrabold" : "text-white/80"}`}>Event</a>
+                  <a href="#transformation" onClick={() => setMobileMenuOpen(false)} className={`py-2 transition-all ${activeSection === "transformation" ? "text-amber-400 font-extrabold" : "text-white/80"}`}>Before/After</a>
+                  <a href="#overview" onClick={() => setMobileMenuOpen(false)} className={`py-2 transition-all ${activeSection === "overview" ? "text-amber-400 font-extrabold" : "text-white/80"}`}>Overview</a>
+                  <a href="#gallery" onClick={() => setMobileMenuOpen(false)} className={`py-2 transition-all ${activeSection === "gallery" ? "text-amber-400 font-extrabold" : "text-white/80"}`}>Gallery</a>
+                </nav>
+              </div>
+
+              <div className="space-y-4">
+                <GlassButton
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onStartBooking();
+                  }}
+                  variant="gold"
+                  className="w-full py-4 text-xs font-extrabold uppercase tracking-widest min-h-[44px]"
+                >
+                  Book Your Event
+                </GlassButton>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full py-3 text-xs text-white/50 hover:text-white transition-all uppercase tracking-wider font-semibold min-h-[44px]"
+                >
+                  Close Menu
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Hero Central Headline */}
         <div className="relative z-20 flex-grow flex flex-col justify-center items-center text-center px-4">
@@ -305,10 +486,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           transition={{ duration: 1 }}
           className="relative rounded-3xl overflow-hidden shadow-2xl h-[400px] border border-purple-royal/10"
         >
-          <img
+          <Image
             src="/assets/images/06_main_entrance.jpg"
             alt="Grand Entrance"
-            className="w-full h-full object-cover"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+            loading="lazy"
           />
         </motion.div>
       </section>
@@ -325,10 +509,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
             transition={{ duration: 1 }}
             className="relative rounded-3xl overflow-hidden shadow-2xl h-[400px] border border-purple-royal/10 order-2 lg:order-1"
           >
-            <img
+            <Image
               src="/assets/images/02_grand_hall_wide.jpg"
               alt="Maharaja Grand Hall Wide View"
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+              loading="lazy"
             />
           </motion.div>
           
@@ -375,15 +562,14 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Lawn Video Block */}
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-purple-royal/10 h-[400px]">
-              <video
+              <LazyVideo
+                src="/assets/videos/lawn2_1.mp4"
+                poster="/assets/images/lawn2_1.jpg"
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="w-full h-full object-cover"
-              >
-                <source src="/assets/videos/lawn2_1.mp4" type="video/mp4" />
-              </video>
+              />
               <div className="absolute inset-0 bg-black/20 pointer-events-none" />
               <div className="absolute bottom-6 left-6 text-white z-10">
                 <span className="text-[10px] font-black uppercase tracking-widest text-amber-400">Emerald Lawns</span>
@@ -394,31 +580,43 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
             {/* Lawn Photos Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div className="relative rounded-2xl overflow-hidden shadow-md h-44 group">
-                <img
+                <Image
                   src="/assets/images/lawn2_1.jpg"
                   alt="Lawn View 1"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-all duration-500"
+                  loading="lazy"
                 />
               </div>
               <div className="relative rounded-2xl overflow-hidden shadow-md h-44 group">
-                <img
+                <Image
                   src="/assets/images/lawn2_2.jpg"
                   alt="Lawn View 2"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-all duration-500"
+                  loading="lazy"
                 />
               </div>
               <div className="relative rounded-2xl overflow-hidden shadow-md h-44 group">
-                <img
+                <Image
                   src="/assets/images/lawn2_3.jpg"
                   alt="Lawn View 3"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-all duration-500"
+                  loading="lazy"
                 />
               </div>
               <div className="relative rounded-2xl overflow-hidden shadow-md h-44 group">
-                <img
+                <Image
                   src="/assets/images/lawn2_4.jpg"
                   alt="Lawn View 4"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-all duration-500"
+                  loading="lazy"
                 />
               </div>
             </div>
@@ -459,10 +657,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           transition={{ duration: 1 }}
           className="relative rounded-3xl overflow-hidden shadow-2xl h-[400px] border border-purple-royal/10"
         >
-          <img
+          <Image
             src="/assets/images/03_stage_purple_theme.jpg"
             alt="Decorated Stage"
-            className="w-full h-full object-cover"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+            loading="lazy"
           />
         </motion.div>
       </section>
@@ -472,15 +673,15 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
          ========================================== */}
       <section id="event" className="py-32 bg-purple-royal text-white text-center relative overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <video
+          <LazyVideo
+            src="/assets/videos/02_wedding_highlights.mp4"
+            poster="/assets/images/01_hall_event_view.jpg"
             autoPlay
             loop
             muted
             playsInline
             className="w-full h-full object-cover opacity-25 scale-105"
-          >
-            <source src="/assets/videos/02_wedding_highlights.mp4" type="video/mp4" />
-          </video>
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-[#1C1613]/80 via-transparent to-[#1C1613]/90 z-10" />
         </div>
         
@@ -515,7 +716,6 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           <div
             ref={sliderRef}
             onMouseMove={handleMouseMove}
-            onTouchMove={handleTouchMove}
             className="relative h-[480px] w-full rounded-3xl overflow-hidden shadow-2xl cursor-ew-resize select-none border border-purple-royal/10"
           >
             {/* Base Image (Empty Hall) */}
@@ -523,6 +723,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
               src="/assets/images/05_empty_hall.jpg"
               alt="Empty Hall"
               className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              loading="lazy"
             />
 
             {/* Overlapping Image (Decorated Event) */}
@@ -535,6 +736,7 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
                 alt="Decorated Hall"
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none max-w-none"
                 style={{ width: sliderRef.current ? sliderRef.current.getBoundingClientRect().width : "100%" }}
+                loading="lazy"
               />
             </div>
 
@@ -579,15 +781,15 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </motion.div>
 
           <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-purple-royal/10 h-[380px]">
-            <video
+            <LazyVideo
               ref={walkthroughVideoRef}
+              src="/assets/videos/whatsapp_video.mp4"
+              poster="/assets/images/gallery_2.jpg"
               loop
               muted
               playsInline
               className="w-full h-full object-cover"
-            >
-              <source src="/assets/videos/whatsapp_video.mp4" type="video/mp4" />
-            </video>
+            />
             <div className="absolute inset-0 bg-black/35 flex flex-col justify-center items-center text-center p-6 z-10">
               <button
                 onClick={toggleWalkthrough}
@@ -618,10 +820,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
-            <img
+            <Image
               src="/assets/images/03_stage_purple_theme.jpg"
               alt="Purple Theme Mandap"
-              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+              fill
+              sizes="(max-width: 768px) 100vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-all duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
               <div className="text-white space-y-1">
@@ -632,10 +837,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </div>
 
           <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
-            <img
+            <Image
               src="/assets/images/04_stage_emerald_theme.jpg"
               alt="Emerald Theme Mandap"
-              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+              fill
+              sizes="(max-width: 768px) 100vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-all duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
               <div className="text-white space-y-1">
@@ -646,10 +854,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </div>
 
           <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
-            <img
+            <Image
               src="/assets/images/06_main_entrance.jpg"
               alt="Grand Main Entrance"
-              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+              fill
+              sizes="(max-width: 768px) 100vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-all duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
               <div className="text-white space-y-1">
@@ -660,10 +871,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </div>
 
           <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
-            <img
+            <Image
               src="/assets/images/gallery_1.jpg"
               alt="Lawn reception lights"
-              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+              fill
+              sizes="(max-width: 768px) 100vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-all duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
               <div className="text-white space-y-1">
@@ -674,10 +888,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </div>
 
           <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
-            <img
+            <Image
               src="/assets/images/gallery_2.jpg"
               alt="Grand Hall Stage Setting"
-              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+              fill
+              sizes="(max-width: 768px) 100vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-all duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
               <div className="text-white space-y-1">
@@ -688,10 +905,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </div>
 
           <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
-            <img
+            <Image
               src="/assets/images/gallery_3.jpg"
               alt="Evening event gathering"
-              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+              fill
+              sizes="(max-width: 768px) 100vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-all duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
               <div className="text-white space-y-1">
@@ -702,10 +922,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </div>
 
           <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
-            <img
+            <Image
               src="/assets/images/gallery_4.jpg"
               alt="Bridal room master suite"
-              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+              fill
+              sizes="(max-width: 768px) 100vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-all duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
               <div className="text-white space-y-1">
@@ -716,10 +939,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           </div>
 
           <div className="relative rounded-3xl overflow-hidden group shadow-md h-72">
-            <img
+            <Image
               src="/assets/images/gallery_5.jpg"
               alt="Mandap details"
-              className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+              fill
+              sizes="(max-width: 768px) 100vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-all duration-500"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4 text-center">
               <div className="text-white space-y-1">
@@ -973,10 +1199,13 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
       <section className="relative h-[80vh] w-full flex flex-col justify-center items-center text-center overflow-hidden">
         {/* Parallax Background Image */}
         <div className="absolute inset-0 z-0">
-          <img
+          <Image
             src="/assets/images/06_main_entrance.jpg"
             alt="Final Entrance Banner"
-            className="w-full h-full object-cover scale-105"
+            fill
+            sizes="100vw"
+            className="object-cover scale-105"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#1C1613] via-[#1C1613]/70 to-[#1C1613]/90 z-10" />
         </div>
@@ -994,9 +1223,9 @@ export const LuxuryStorytellingView: React.FC<LuxuryStorytellingViewProps> = ({ 
           <GlassButton
             variant="gold"
             onClick={onStartBooking}
-            className="py-4 px-10 text-xs font-extrabold uppercase tracking-widest shadow-2xl hover:scale-105 transition-all mt-4 border-amber-400 text-purple-royal bg-gradient-to-r from-amber-300 via-amber-400 to-amber-300 hover:from-amber-200 hover:to-amber-200"
+            className="py-4 px-10 text-xs font-extrabold uppercase tracking-widest shadow-2xl hover:scale-105 transition-all mt-4 border-amber-400 text-purple-royal bg-gradient-to-r from-amber-300 via-amber-400 to-amber-300 hover:from-amber-200 hover:to-amber-200 min-h-[44px]"
           >
-            Reserve Your Dates
+            Book Your Event
           </GlassButton>
         </div>
 
